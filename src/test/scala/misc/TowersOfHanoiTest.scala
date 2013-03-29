@@ -2,10 +2,6 @@ package misc
 
 import org.scalatest.FunSuite
 
-/**
- * User: hanlho
- * DateTime: 29/03/13 13:12
- */
 class TowersOfHanoiTest extends FunSuite {
 
   import misc.TowersOfHanoi.transferFromAtoC

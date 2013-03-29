@@ -8,6 +8,7 @@ object TowersOfHanoi {
 
   /*
   Towers Of Hanoi.
+
   There are three pegs: A, B and C. There are n disks. All disks are different in size.
   The disks are initially stacked on peg A so that they increase in size from the top to the bottom.
   The goal is to transfer the entire tower from the A peg to the C peg.
