@@ -1,9 +1,5 @@
 package misc
 
-/**
- * User: hanlho
- * DateTime: 29/03/13 13:10
- */
 object TowersOfHanoi {
 
   /*
@@ -22,15 +18,14 @@ object TowersOfHanoi {
   def transferFromAtoC(n: Int): List[String] = {
 
     def transferFrom(m: Int, from: Int, to: Int): List[String] = {
-      if (m == 1) {
-        // single disk
+      if (m == 1) {        // single disk
         indexMoveToStringMove(from, to) :: Nil
       } else {
-        transferFrom(m - 1, from, remainingIndex(from, to)) ++: transferFrom(1, from, to) ++: transferFrom(m - 1, remainingIndex(from, to), to)
+        transferFrom(m - 1, from, notFromOrTo(from, to)) ++: transferFrom(1, from, to) ++: transferFrom(m - 1, notFromOrTo(from, to), to)
       }
     }
 
-    def remainingIndex(i1: Int, i2: Int) = {
+    def notFromOrTo(i1: Int, i2: Int) = {
       if ((i1 == 0 && i2 == 1) || (i1 == 1 && i2 == 0)) 2
       else
       if ((i1 == 2 && i2 == 1) || (i1 == 1 && i2 == 2)) 0
@@ -39,16 +34,18 @@ object TowersOfHanoi {
     }
 
     def indexMoveToStringMove(from: Int, to: Int): String = {
+
+      def indexToString(index: Int): String = {
+        index match {
+          case 0 => "A"
+          case 1 => "B"
+          case 2 => "C"
+        }
+      }
+
       indexToString(from) + "-" + indexToString(to)
     }
 
-    def indexToString(index: Int): String = {
-      index match {
-        case 0 => "A"
-        case 1 => "B"
-        case 2 => "C"
-      }
-    }
     transferFrom(n, 0, 2)
   }
 
