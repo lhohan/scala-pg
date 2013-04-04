@@ -18,5 +18,13 @@ class Ch12ExercisesTest extends FunSuite {
 
   }
 
+  test("exercise 2") {
+    assert(4 === maxUsingReduceLeft(Array(1, 4, 2, 0, -6)))
+    assert(1 === maxUsingReduceLeft(Array(1)))
+    intercept[IllegalArgumentException] {
+      maxUsingReduceLeft(Array())
+    }
+  }
+
 
 }
