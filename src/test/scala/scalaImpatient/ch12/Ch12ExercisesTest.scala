@@ -27,4 +27,45 @@ class Ch12ExercisesTest extends FunSuite {
   }
 
 
+  test("exercise 3") {
+    assert(6 === factorialUsingReduceLeft(3))
+    assert(120 === factorialUsingReduceLeft(5))
+    assert(1 === factorialUsingReduceLeft(1))
+    assert(1 === factorialUsingReduceLeft(0))
+    intercept[IllegalArgumentException] {
+      factorialUsingReduceLeft(-1)
+    }
+
+  }
+
+  test("exercise 4") {
+    assert(6 === factorialUsingFoldLeft(3))
+    assert(120 === factorialUsingFoldLeft(5))
+    assert(1 === factorialUsingFoldLeft(1))
+    assert(1 === factorialUsingFoldLeft(0))
+    intercept[IllegalArgumentException] {
+      factorialUsingFoldLeft(-1)
+    }
+
+  }
+
+  test("exercise 5") {
+    assert(25 === largest(x => 10 * x - x * x, 1 to 10))
+    assert(10 === largest(x => x, 1 to 10))
+  }
+
+  test("exercise 6") {
+    assert(5 === largestAt(x => 10 * x - x * x, 1 to 10))
+    assert(10 === largestAt(x => x, 1 to 10))
+    assert(1 === largestAt(x => -x, 1 to 10))
+  }
+
+  test("exercise 7") {
+    val pairs = (1 to 10) zip (11 to 20)
+    val s: Seq[Int] = sum(pairs)
+    assert(12 === s.head)
+    assert(30 === s(9))
+  }
+
+
 }
