@@ -1,8 +1,11 @@
 package scalaImpatient.ch12
 
 import org.scalatest.FunSuite
+import org.scalatest.concurrent.Timeouts
+import org.scalatest.time.{Span, Millis}
+import org.scalatest.exceptions.TestFailedDueToTimeoutException
 
-class Ch12ExercisesTest extends FunSuite {
+class Ch12ExercisesTest extends FunSuite with Timeouts {
 
   import scalaImpatient.ch12.Chapter12HigherOrderFunctions._
 
@@ -65,6 +68,43 @@ class Ch12ExercisesTest extends FunSuite {
     val s: Seq[Int] = sum(pairs)
     assert(12 === s.head)
     assert(30 === s(9))
+  }
+
+  test("exercise 8") {
+    assert(compareStringLengthsToValue(Array("abcdef"), Array(6)), "exercise 8.1.1")
+    assert(!compareStringLengthsToValue(Array("abcdef"), Array(7)), "exercise 8.1.2")
+    assert(compareStringLengthsToValue(Array("hello", "world", "!"), Array(5, 5, 1)), "exercise 8.2")
+    assert(compareStringLengthsToValue(Array(), Array()), "exercise 8.3")
+    assert(!compareStringLengthsToValue(Array("hello", "world", "!"), Array(4, 5, 1)), "exercise 8.4")
+  }
+
+  test("exercise 10") {
+    var x = 1
+    unless(x > 5) {
+      x += 1
+    }
+    assert(6 === x)
+  }
+
+  test("exercise 10 - no call by name") {
+    var x = 1
+    intercept[TestFailedDueToTimeoutException] {
+      failAfter(Span(200, Millis))(
+        unlessNoCallByName(x > 5) {
+          x += 1
+          Thread.sleep(10) // without this failAfter does not fail
+        }
+      )
+    }
+    assert(x > 6) // x will keep on counting past 6 (note this test may fail of failAfter timeout is not high enough)
+  }
+
+  test("exercise 10 - no currying") {
+    var x = 1
+    unlessNoCurrying(x > 5, {
+      x += 1
+    })
+    assert(6 === x)
   }
 
 

@@ -47,5 +47,34 @@ object Chapter12HigherOrderFunctions {
     pairs.map((adjustToPair(_ + _)))
   }
 
+  // exercise 8
+  def compareStringLengthsToValue(strArr: Array[String], lengthArr: Array[Int]): Boolean = {
+    strArr.corresponds(lengthArr)(_.length == _)
+  }
+
+  // exercise 10
+  def unless(condition: => Boolean)(block: => Unit) {
+    if (!condition) {
+      block
+      unless(condition)(block)
+    }
+  }
+
+  // exercise 10 - no call by name
+  def unlessNoCallByName(condition: Boolean)(block: => Unit) {
+    if (!condition) {
+      block
+      unlessNoCallByName(condition)(block)
+    }
+  }
+
+  // exercise 10 - no currying
+  def unlessNoCurrying(condition: => Boolean, block: => Unit) {
+    if (!condition) {
+      block
+      unlessNoCurrying(condition, block)
+    }
+  }
+
 
 }
