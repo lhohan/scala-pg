@@ -5,7 +5,7 @@ object Chapter05Classes {
   // exercise 1
   class Counter {
 
-    private var value = 0
+    private var value = Int.MaxValue - 100 // for testing purposes just set it a bit close to MaxValue
 
     def increment() {
       if (value < Int.MaxValue) {
