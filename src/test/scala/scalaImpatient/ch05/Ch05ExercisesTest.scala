@@ -39,4 +39,16 @@ class Ch05ExercisesTest extends FunSuite {
     assert(t1.before(t4), "time test 3")
   }
 
+  // exercise 4
+  test("test Time2 class using same tests as exercise 3") {
+    val t1 = new Time2(0, 30)
+    val t2 = new Time2(0, 45)
+    val t3 = new Time2(0, 15)
+    val t4 = new Time2(23, 15)
+
+    assert(t1.before(t2), "time test 1")
+    assert(!t1.before(t3), "time test 2")
+    assert(t1.before(t4), "time test 3")
+  }
+
 }

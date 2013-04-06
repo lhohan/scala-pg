@@ -42,4 +42,11 @@ object Chapter05Classes {
     }
   }
 
+  //exercise 4
+  class Time2(hrs: Int, min: Int) {
+    val totMin = hrs * 60 + min
+
+    def before(other: Time2): Boolean = totMin < other.totMin
+  }
+
 }
