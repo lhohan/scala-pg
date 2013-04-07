@@ -51,4 +51,47 @@ class Ch05ExercisesTest extends FunSuite {
     assert(t1.before(t4), "time test 3")
   }
 
+  // exercise 5
+  test("test Student class Java bean properties") {
+    val s = new Student("Chuck", 1)
+    assert("Chuck" === s.name)
+    assert("Chuck" === s.getName)
+    assert(1 === s.id)
+    assert(1 === s.getId)
+    // test setting value using Scala property setter
+    s.name = "Norris"
+    s.id = 2
+    assert("Norris" === s.name)
+    assert("Norris" === s.getName)
+    assert(2 === s.id)
+    assert(2 === s.getId)
+    // test setting value using Java property setter
+    s.setName("Bruce")
+    s.setId(3)
+    assert("Bruce" === s.name)
+    assert("Bruce" === s.getName)
+    assert(3 === s.id)
+    assert(3 === s.getId)
+
+    /**
+     * Result javap:
+     * PS ...\scala-pg> &'C:\Program Files\Java\jdk1.7.0_05\bin\javap' '.\target\scala-2.9.2\classes\scalaImpatient\c
+h05\Chapter05Classes$Student.class'
+Compiled from "Chapter05Classes.scala"
+
+public class scalaImpatient.ch05.Chapter05Classes$Student implements scala.ScalaObject {
+  public java.lang.String name();
+  public void name_$eq(java.lang.String);
+  public void setName(java.lang.String);
+  public long id();
+  public void id_$eq(long);
+  public void setId(long);
+  public long getId();
+  public java.lang.String getName();
+  public scalaImpatient.ch05.Chapter05Classes$Student(java.lang.String, long);
+}
+     *
+     * */
+  }
+
 }

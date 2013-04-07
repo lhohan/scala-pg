@@ -1,5 +1,7 @@
 package scalaImpatient.ch05
 
+import scala.reflect.BeanProperty
+
 object Chapter05Classes {
 
   // exercise 1
@@ -48,5 +50,8 @@ object Chapter05Classes {
 
     def before(other: Time2): Boolean = totMin < other.totMin
   }
+
+  // exercise 5
+  class Student(@BeanProperty var name : String, @BeanProperty var id: Long)
 
 }
