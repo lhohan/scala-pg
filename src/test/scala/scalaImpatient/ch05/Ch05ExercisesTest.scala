@@ -91,7 +91,81 @@ public class scalaImpatient.ch05.Chapter05Classes$Student implements scala.Scala
   public scalaImpatient.ch05.Chapter05Classes$Student(java.lang.String, long);
 }
      *
-     * */
+     **/
+  }
+
+  // exercise 6
+  test("Person class, negative values for age are set to 0") {
+    val p = new Person
+    p.age = 25
+    assert(25 === p.age)
+
+    p.age = -10
+    assert(0 === p.age)
+  }
+
+  // exercise 7
+  test("Person2 class, first and last name from name") {
+    val p = new Person2("Jeff Smith")
+    assert("Jeff" === p.firstName)
+    assert("Smith" === p.lastName)
+    //    does not work:
+    //    assert("Jeff Smith" === p.name)
+  }
+
+  // exercise 8
+  test("Car class tests") {
+    val c = new Car("BMW", "320d")
+    assert("BMW" === c.manufacturer)
+    assert("320d" === c.modelName)
+    assert("320d" === c.modelName)
+    assert(-1 === c.modelYear)
+    assert("" === c.licensePlate)
+    c.licensePlate = "1-CUR-314"
+    assert("1-CUR-314" === c.licensePlate)
+    //  does not work
+    //  c.modelName = "Bugatti"
+
+    val c1 = new Car("BMW", "320d", modelYear = 2012)
+    assert("BMW" === c1.manufacturer)
+    assert("320d" === c1.modelName)
+    assert(2012 === c1.modelYear)
+    assert("" === c1.licensePlate)
+
+    val c2 = new Car("BMW", "320d", licensePlate = "1-CUR-314")
+    assert("BMW" === c2.manufacturer)
+    assert("320d" === c2.modelName)
+    assert(-1 === c2.modelYear)
+    assert("1-CUR-314" === c2.licensePlate)
+
+    val c3 = new Car("BMW", "320d", licensePlate ="ABC-123", modelYear = 2012)
+    assert("BMW" === c3.manufacturer)
+    assert("320d" === c3.modelName)
+    assert(2012 === c3.modelYear)
+    assert("ABC-123" === c3.licensePlate)
+
+  }
+
+  // exercise 9 : implement the above in Java: I get the point: I'll be writing a whole lot more code ;-)
+
+  test("employee class"){
+    val e1 = new Employee()
+    assert("John Q. Public" === e1.name)
+    assert(0.0 === e1.salary)
+
+    val e2 = new Employee("Jack Bauer", 100000)
+    assert("Jack Bauer" === e2.name)
+    assert(100000 === e2.salary)
+
+
+    val e3 = new Employee2()
+    assert("John Q. Public" === e3.name)
+    assert(0.0 === e3.salary)
+
+    val e4 = new Employee2("Jack Bauer", 100000)
+    assert("Jack Bauer" === e4.name)
+    assert(100000 === e4.salary)
+
   }
 
 }

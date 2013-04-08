@@ -52,6 +52,60 @@ object Chapter05Classes {
   }
 
   // exercise 5
-  class Student(@BeanProperty var name : String, @BeanProperty var id: Long)
+  class Student(@BeanProperty var name: String, @BeanProperty var id: Long)
+
+  // exercise 6
+  class Person {
+    private var privateAge = 0
+
+    def age = privateAge
+
+    def age_=(newAge: Int) {
+      if (newAge < 0) privateAge = 0
+      else privateAge = newAge
+    }
+  }
+
+  // exercise 7
+  class Person2(name: String) {
+    def firstName = name.split(" ")(0)
+
+    def lastName = name.split(" ")(1)
+
+    // needs error and corner case handling
+
+    // on the 'why?' question: there can be different reasons why you would chose val, var or as I did: nothing
+    // I chose this implementation as it's the easiest one that worked
+  }
+
+  // exercise 8
+  class Car(val manufacturer: String, val modelName: String, val modelYear: Int = -1, var licensePlate: String = "")
+
+  // exercise 10 - original class
+  class Employee(val name: String, var salary: Double) {
+    def this() {
+      this("John Q. Public", 0.0)
+    }
+  }
+
+  // exercise 10 - solution class
+  class Employee2() {
+    private var _name: String = "John Q. Public"
+    var _salary: Double = 0.0
+
+    def this(name : String, salary : Int) {
+      this()
+      _name = name
+      _salary = salary
+    }
+
+    def name  = {
+      _name
+    }
+
+    def salary = {
+      _salary
+    }
+  }
 
 }
