@@ -1,16 +1,19 @@
 package scalaImpatient.ch10
 
+import java.awt.geom.Ellipse2D
+
 object Chapter10Traits {
 
-  trait RectangleLike {
-
-//    var x: Double
-//
-//    var y: Double
+  trait RectangleLike extends Ellipse2D.Double {
 
     def translate(dx: Double, dy: Double) {
-//      x += dx
-//      y -= dy
+      this.x += dx
+      this.y += dy
+    }
+
+    def grow(dwith: Double, dheight: Double) {
+      this.width += dwith
+      this.height += dheight
     }
 
   }
