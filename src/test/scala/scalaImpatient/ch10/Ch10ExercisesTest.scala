@@ -6,6 +6,8 @@ import scalaImpatient.ch10.Chapter10Traits._
 import java.awt.Point
 import java.beans.{PropertyChangeSupport, PropertyChangeEvent, PropertyChangeListener}
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
+import java.io.{ByteArrayInputStream, InputStream}
+import scala.collection.mutable.ArrayBuffer
 
 class Ch10ExercisesTest extends FunSuite {
 
@@ -62,5 +64,30 @@ class Ch10ExercisesTest extends FunSuite {
 
     p.setLocation(5, 7)
     assert(detected)
+  }
+
+  test("exercise 8") {
+    def readAll(s: String): String = {
+      val in: InputStream = new ByteArrayInputStream(s.getBytes("UTF-8")) with Buffered
+      var byte = in.read()
+      var stuffRead = new ArrayBuffer[Char]()
+      while (byte != -1) {
+        stuffRead += byte.toChar
+        byte = in.read()
+      }
+      stuffRead.mkString
+    }
+
+    assert("" === readAll(""))
+    assert("A" === readAll("A"))
+    // text size of default buffer size
+    assert("12345678" === readAll("12345678"))
+    // text size one longer than buffer size
+    assert("123456789" === readAll("123456789"))
+    // text size one shorter than buffer size
+    assert("1234567" === readAll("1234567"))
+    // text size somewhat longer
+    assert("Some text longer than default buffer size." === readAll("Some text longer than default buffer size."))
+
   }
 }

@@ -4,6 +4,7 @@ import java.awt.geom.Ellipse2D
 import java.awt.Point
 import java.beans.{PropertyChangeEvent, PropertyChangeListener, PropertyChangeSupport}
 import java.beans
+import java.io.{InputStream, FileInputStream}
 
 object Chapter10Traits {
 
@@ -110,6 +111,34 @@ object Chapter10Traits {
     }
 
     def hasListeners(propertyName: String) = support.hasListeners(propertyName)
+  }
+
+  // exercise 8
+  trait Buffered {
+    this: InputStream =>
+
+    private val DefaultBufferSize = 8
+
+    val _buffer = new Array[Byte](DefaultBufferSize)
+    var _pos: Int = 0
+    var _count: Int = 0
+
+    override def read: Int = {
+      var endReached = false
+      if (_pos >= _count) {
+        _pos = 0
+        _count = read(_buffer, 0, _buffer.length)
+        if (_count == -1) {
+          endReached = true
+        }
+      }
+      if (endReached) {
+        -1
+      } else {
+        _pos = _pos + 1
+        _buffer(_pos - 1)
+      }
+    }
   }
 
 
