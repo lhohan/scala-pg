@@ -69,8 +69,8 @@ class Ch10ExercisesTest extends FunSuite {
   test("exercise 8") {
     def readAll(s: String): String = {
       val in: InputStream = new ByteArrayInputStream(s.getBytes("UTF-8")) with Buffered
-      var byte = in.read()
       var stuffRead = new ArrayBuffer[Char]()
+      var byte = in.read()
       while (byte != -1) {
         stuffRead += byte.toChar
         byte = in.read()
@@ -78,6 +78,32 @@ class Ch10ExercisesTest extends FunSuite {
       stuffRead.mkString
     }
 
+    assert("" === readAll(""))
+    assert("A" === readAll("A"))
+    // text size of default buffer size
+    assert("12345678" === readAll("12345678"))
+    // text size one longer than buffer size
+    assert("123456789" === readAll("123456789"))
+    // text size one shorter than buffer size
+    assert("1234567" === readAll("1234567"))
+    // text size somewhat longer
+    assert("Some text longer than default buffer size." === readAll("Some text longer than default buffer size."))
+
+  }
+
+  test("exercise 9") {
+    def readAll(s: String) :String = {
+      val in = new ByteArrayInputStream(s.getBytes("UTF-8")) with BufferedWithLogger
+      val myBuffer = new ArrayBuffer[String]() // this buffer we use to capture everything that is logged
+      in.logger = new ArrayBufferLogger(myBuffer)
+      var byte = in.read
+      while (byte != -1) {
+        byte = in.read
+      }
+      myBuffer.mkString
+    }
+
+    // same tests as ex. 8
     assert("" === readAll(""))
     assert("A" === readAll("A"))
     // text size of default buffer size

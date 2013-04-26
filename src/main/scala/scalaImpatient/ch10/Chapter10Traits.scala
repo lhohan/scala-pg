@@ -5,6 +5,7 @@ import java.awt.Point
 import java.beans.{PropertyChangeEvent, PropertyChangeListener, PropertyChangeSupport}
 import java.beans
 import java.io.{InputStream, FileInputStream}
+import scala.collection.mutable.ArrayBuffer
 
 object Chapter10Traits {
 
@@ -137,6 +138,51 @@ object Chapter10Traits {
       } else {
         _pos = _pos + 1
         _buffer(_pos - 1)
+      }
+    }
+  }
+
+  // exercise 9
+  class ArrayBufferLogger(val buffer: ArrayBuffer[String] = new ArrayBuffer[String]()) extends Logger {
+    def log(msg: String) {
+      buffer += msg
+    }
+  }
+
+
+  trait BufferedWithLogger {
+    this: InputStream =>
+
+    // default logger to Console
+    var logger: Logger = new Logger {
+      def log(msg: String) {
+        println(msg)
+      }
+    }
+
+    private val DefaultBufferSize = 8
+
+    val _buffer = new Array[Byte](DefaultBufferSize)
+    var _pos: Int = 0
+    var _count: Int = 0
+
+    override def read: Int = {
+      var endReached = false
+      if (_pos >= _count) {
+        _pos = 0
+        _count = read(_buffer, 0, _buffer.length)
+        if (_count == -1) {
+          endReached = true
+        }
+      }
+      if (endReached) {
+        -1
+      } else {
+        _pos = _pos + 1
+        val charRead: Byte = _buffer(_pos - 1)
+        // log all chars read from our internal buffer
+        logger.log(charRead.toChar.toString)
+        charRead
       }
     }
   }
