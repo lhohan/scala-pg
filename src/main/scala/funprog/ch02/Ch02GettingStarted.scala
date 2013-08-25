@@ -1,5 +1,7 @@
 package funprog.ch02
 
+import scala.math.ScalaNumber
+
 /**
  * User: hanlho
  * DateTime: 20/05/13 9:09
@@ -22,11 +24,14 @@ object Ch02GettingStarted {
   // exercise 2
   def abs(x: Int) = if (x < 0) -x else x
 
-  def neg(x:Int) = -x // test function
-  def timesTwo(x:Int) = 2 * x // test function
+  def neg(x: Int) = -x
+
+  // test function
+  def timesTwo(x: Int) = 2 * x // test function
 
   def absolute(f: Int => Int): Int => Int = {
     x => abs(f(x))
   }
+
 
 }
