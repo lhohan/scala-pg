@@ -14,6 +14,8 @@ object HelloWorld extends App {
   helloActor ! "hello"
   helloActor ! "Bonjour"
 
+  system.shutdown()
+
   class HelloActor(name: String) extends Actor{
     def receive = {
       case "hello" => println("%s: nice to meet you!".format(name))
