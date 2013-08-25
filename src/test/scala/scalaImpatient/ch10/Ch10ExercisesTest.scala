@@ -92,7 +92,7 @@ class Ch10ExercisesTest extends FunSuite {
   }
 
   test("exercise 9") {
-    def readAll(s: String) :String = {
+    def readAll(s: String): String = {
       val in = new ByteArrayInputStream(s.getBytes("UTF-8")) with BufferedWithLogger
       val myBuffer = new ArrayBuffer[String]() // this buffer we use to capture everything that is logged
       in.logger = new ArrayBufferLogger(myBuffer)
@@ -116,4 +116,12 @@ class Ch10ExercisesTest extends FunSuite {
     assert("Some text longer than default buffer size." === readAll("Some text longer than default buffer size."))
 
   }
+
+
+//  test("exercise 10") {
+//    val in = new ByteArrayInputStream("hello iterable stream".getBytes("UTF-8")) with IterableInputStream
+//    for (i <- in){
+//      println(i)
+//    }
+//  }
 }

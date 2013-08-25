@@ -187,5 +187,28 @@ object Chapter10Traits {
     }
   }
 
+//  // exercise 10
+//  trait IterableInputStream[Byte] extends InputStream with Iterable[Byte] {
+//    def read():Int = {
+//      readByte()
+//    }
+//
+//    def iterator: Iterator[Byte] = new Iterator[Byte] {
+//      def hasNext = {
+//        available() > 0
+//      }
+//
+//      def next(): Byte = {
+//        try {
+//          read()
+//          new Byte
+//        }
+//        catch {
+//          case e  =>  throw new Error(e)
+//        }
+//      }
+//    }
+//  }
+
 
 }
