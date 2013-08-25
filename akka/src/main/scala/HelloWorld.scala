@@ -9,15 +9,15 @@ import akka.actor.{Props, ActorSystem, Actor}
 object HelloWorld extends App {
 
   val system = ActorSystem("hello-world-system")
-  val helloActor = system.actorOf(Props[HelloActor],"hello-actor")
+  val helloActor = system.actorOf(Props(new HelloActor("Hans")),"hello-actor")
 
   helloActor ! "hello"
   helloActor ! "Bonjour"
 
-  class HelloActor extends Actor{
+  class HelloActor(name: String) extends Actor{
     def receive = {
-      case "hello" => println("nice to meet you!")
-      case _ => println("* blank stare *")
+      case "hello" => println("%s: nice to meet you!".format(name))
+      case _ => println("%s: * blank stare *".format(name))
     }
   }
 
