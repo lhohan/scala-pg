@@ -20,6 +20,9 @@ object PingPong extends App {
 
   ping ! StartMessage
 
+  Thread.sleep(5000)
+  system.shutdown()
+
   class Ping(pong: ActorRef) extends Actor {
 
     var count = 0
