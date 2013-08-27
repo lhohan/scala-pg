@@ -12,7 +12,7 @@ import akka.routing.RoundRobinRouter
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
-class Pi {
+object Pi extends App {
 
   sealed trait PiMessage
 
