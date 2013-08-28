@@ -14,6 +14,23 @@ import scala.concurrent.duration._
 
 object Pi extends App {
 
+  def calculate(nrOfWorkers: Int, nrOfElements: Int, nrOfMessages: Int) {
+    // create an Akka system
+    val system = ActorSystem("PiSystem")
+
+    // create the result listener, which will print the result and shuts down the system
+    val listener = system.actorOf(Props[Listener], name = "listener")
+
+    // create master
+    val master = system.actorOf(Props(new Master(
+      nrOfWorkers, nrOfMessages, nrOfElements, listener
+    )), name = "master")
+
+    master ! Calculate
+  }
+
+  calculate(nrOfWorkers = 4, nrOfElements = 10000, nrOfMessages = 10000)
+
   sealed trait PiMessage
 
   case object Calculate extends PiMessage
@@ -37,6 +54,30 @@ object Pi extends App {
     def receive = {
       case Work(start, nrOfElements) => sender ! Result(calculatePiFor(start, nrOfElements))
 
+    }
+  }
+
+
+  class Master(nrOfWorkers: Int, nrOfMessages: Int, nrOfElements: Int, listener: ActorRef) extends Actor {
+
+    var pi: Double = _
+    var nrOfResults: Int = _
+    val start: Long = System.currentTimeMillis
+
+    val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workRouter")
+
+    def receive = {
+      case Calculate => {
+        for (i <- 0 until nrOfMessages) workerRouter ! Work(i * nrOfElements, nrOfElements)
+      }
+      case Result(value) => {
+        pi += value
+        nrOfResults += 1
+        if (nrOfResults == nrOfMessages) {
+          listener ! PiApproximation(pi, duration = (System.currentTimeMillis() - start).millis)
+          context.stop(self)
+        }
+      }
     }
   }
 
