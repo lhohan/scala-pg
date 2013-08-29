@@ -3,6 +3,9 @@
  * DateTime: 27/08/13 17:45
  *
  * http://doc.akka.io/docs/akka/2.0/intro/getting-started-first-scala.html
+ *
+ * Run using sbt directly as:
+ *    sbt "run-main Pi"
  */
 
 import akka.actor._
