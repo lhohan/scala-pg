@@ -15,22 +15,7 @@ import scala.concurrent.duration._
 
 object Pi extends App {
 
-  def calculate(nrOfWorkers: Int, nrOfElements: Int, nrOfMessages: Int) {
-    // create an Akka system
-    val system = ActorSystem("PiSystem")
-
-    // create the result listener, which will print the result and shuts down the system
-    val listener = system.actorOf(Props[Listener], name = "listener")
-
-    // create master
-    val master = system.actorOf(Props(new Master(
-      nrOfWorkers, nrOfMessages, nrOfElements, listener
-    )), name = "master")
-
-    master ! Calculate
-  }
-
-  calculate(nrOfWorkers = 4, nrOfElements = 10000, nrOfMessages = 10000)
+  calculate(nrOfWorkers = 40, nrOfElements = 1000, nrOfMessages = 2000000)
 
   sealed trait PiMessage
 
@@ -44,7 +29,7 @@ object Pi extends App {
 
   class Worker extends Actor {
 
-    // TODO: create functional equivalent
+    // TODO: write test and create functional equivalent
     def calculatePiFor(start: Int, nrOfElements: Int): Double = {
       var acc = 0.0
       for (i <- start until (start + nrOfElements))
@@ -53,11 +38,11 @@ object Pi extends App {
     }
 
     def receive = {
-      case Work(start, nrOfElements) => sender ! Result(calculatePiFor(start, nrOfElements))
-
+      case Work(start, nrOfElements) =>
+        sender ! Result(calculatePiFor(start, nrOfElements))
     }
-  }
 
+  }
 
   class Master(nrOfWorkers: Int, nrOfMessages: Int, nrOfElements: Int, listener: ActorRef) extends Actor {
 
@@ -91,5 +76,21 @@ object Pi extends App {
       }
     }
   }
+
+  def calculate(nrOfWorkers: Int, nrOfElements: Int, nrOfMessages: Int) {
+    // create an Akka system
+    val system = ActorSystem("PiSystem")
+
+    // create the result listener, which will print the result and shuts down the system
+    val listener = system.actorOf(Props[Listener], name = "listener")
+
+    // create master
+    val master = system.actorOf(Props(new Master(
+      nrOfWorkers, nrOfMessages, nrOfElements, listener
+    )), name = "master")
+
+    master ! Calculate
+  }
+
 
 }
