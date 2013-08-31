@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 
 object Pi extends App {
 
-  calculate(nrOfWorkers = 40, nrOfElements = 1000, nrOfMessages = 2000000)
+  calculate(nrOfWorkers = 100, nrOfElements = 40000, nrOfMessages = 40000)
 
   sealed trait PiMessage
 

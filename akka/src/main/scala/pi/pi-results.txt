@@ -1,0 +1,18 @@
+calculate(nrOfWorkers = 1, nrOfElements = 1000, nrOfMessages = 2000000)
+RESULT:
+
+        Pi approximation:               3.1415926584982694
+        Calculation time:       21615 milliseconds
+
+calculate(nrOfWorkers = 4, nrOfElements = 1000, nrOfMessages = 2000000)
+RESULT:
+
+        Pi approximation:               3.1415926584982694
+        Calculation time:       10766 milliseconds
+
+calculate(nrOfWorkers = 10, nrOfElements = 1000, nrOfMessages = 2000000)
+RESULT:
+        Pi approximation:               3.14159265849827
+        Calculation time:       8580 milliseconds
+note: more deadletters than previous run, incl a 10-worker one => result is less accurate
+
