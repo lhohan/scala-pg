@@ -9,11 +9,18 @@ import akka.actor.{Props, Actor, ActorSystem}
  *
  * Playing with akka.
  */
-object FileCopier extends App{
+object FileCopier extends App {
 
   monitor()
 
   case class StartMonitoring(fileLocation: String)
+
+  case class FindFiles(fileLocation: String)
+
+  case class FileFound(file: String)
+
+  case class CopyFile(file: String, targetLocation: String)
+
 
   def monitor() {
     val system = ActorSystem("FileCopySystem")
