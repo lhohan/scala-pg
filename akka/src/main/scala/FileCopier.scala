@@ -1,15 +1,29 @@
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
+import java.io.File
 
 /**
  * User: hanlho
  * DateTime: 31/08/13 12:03
  *
+ * Playing with akka.
+ *
  * A contrived code sample that monitors a file location
  * and when files are found they are copied to different location.
  *
- * Playing with akka.
+ * Usage:
+ *  args:
+ *    - Pass the dir location to monitor as first argument
+ *
+ * Example:
+ *     sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src"
+ *
  */
 object FileCopier extends App {
+
+  if (args.length == 0) {
+    throw new IllegalArgumentException("Please pass location to monitor as first argument.")
+  }
+  val monitorLocation = args(0)
 
   monitor()
 
@@ -30,7 +44,7 @@ object FileCopier extends App {
     val system = ActorSystem("FileCopySystem")
     val fileCopier = system.actorOf(Props(new FileCopier()), name = "file-copier")
     val fileFinder = system.actorOf(Props(new FileFinder(fileCopier)), name = "file-finder")
-    val locationMonitor = system.actorOf(Props(new LocationMonitor("file location X", fileFinder)), name = "location-monitor")
+    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileFinder)), name = "location-monitor")
     locationMonitor ! StartMonitoring()
   }
 
@@ -50,18 +64,23 @@ object FileCopier extends App {
     }
   }
 
-  class FileFinder(fileCopier: ActorRef) extends Actor {
+  object FileFinder {
+    def findFilesAt(location: String): Array[String] = {
+      new File(location).list()
+    }
+  }
 
-    // TODO temp
-    var filesFound = false
+  class FileFinder(fileCopier: ActorRef) extends Actor {
 
     def receive = {
       case FindFiles(location) =>
         ld("checking for files at " + location)
-        filesFound = !filesFound
-        if (filesFound) {
-          ld("found files ")
-          fileCopier ! CopyFile("myFile", "targetLocation")
+        val filesFound = FileFinder.findFilesAt(location)
+        if (!filesFound.isEmpty) {
+          for (ff <- filesFound) {
+            ld("found file " + ff)
+            fileCopier ! CopyFile(ff, "targetLocation")
+          }
         }
     }
   }
