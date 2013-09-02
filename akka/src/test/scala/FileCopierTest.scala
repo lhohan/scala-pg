@@ -13,7 +13,7 @@ class FileCopierTest extends FunSuite {
   // FileFinder
   test("test FileFinder on local dir") {
     val location: String = fileCopyTestDir + "/src"
-    val filesAt: Array[String] = FileFinder.findFilesAt(location)
+    val filesAt: Array[File] = FileFinder.findFilesAt(new File(location))
     assert(2 === filesAt.size, "wrong number of files found")
   }
 

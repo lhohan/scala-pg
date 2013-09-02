@@ -1,5 +1,5 @@
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
-import java.io.File
+import java.io.{FileOutputStream, FileInputStream, File}
 
 /**
  * User: hanlho
@@ -11,11 +11,11 @@ import java.io.File
  * and when files are found they are copied to different location.
  *
  * Usage:
- *  args:
- *    - Pass the dir location to monitor as first argument
+ * args:
+ * - Pass the dir location to monitor as first argument
  *
  * Example:
- *     sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src"
+ * sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src"
  *
  */
 object FileCopier extends App {
@@ -23,17 +23,21 @@ object FileCopier extends App {
   if (args.length == 0) {
     throw new IllegalArgumentException("Please pass location to monitor as first argument.")
   }
-  val monitorLocation = args(0)
+
+  val monitorLocation = new File(args(0))
+  if (!monitorLocation.isDirectory) {
+    throw new IllegalArgumentException("Location should be directory.")
+  }
 
   monitor()
 
   case class StartMonitoring()
 
-  case class FindFiles(location: String)
+  case class FindFiles(location: File)
 
   case class FileFound(file: String)
 
-  case class CopyFile(file: String, targetLocation: String)
+  case class CopyFile(file: File, targetLocation: File)
 
   case class Wait()
 
@@ -48,7 +52,7 @@ object FileCopier extends App {
     locationMonitor ! StartMonitoring()
   }
 
-  class LocationMonitor(location: String, fileFinder: ActorRef) extends Actor {
+  class LocationMonitor(location: File, fileFinder: ActorRef) extends Actor {
     val waitTime: Int = 1000 // ms
 
     def receive = {
@@ -65,8 +69,8 @@ object FileCopier extends App {
   }
 
   object FileFinder {
-    def findFilesAt(location: String): Array[String] = {
-      new File(location).list()
+    def findFilesAt(location: File): Array[File] = {
+      location.listFiles()
     }
   }
 
@@ -79,16 +83,23 @@ object FileCopier extends App {
         if (!filesFound.isEmpty) {
           for (ff <- filesFound) {
             ld("found file " + ff)
-            fileCopier ! CopyFile(ff, "targetLocation")
+            fileCopier ! CopyFile(ff, new File("targetLocation"))
           }
         }
+    }
+  }
+
+  object FileCopier {
+    def copyFileToLocation(file: File, targetLocation: File) = {
+      new FileOutputStream(targetLocation) getChannel() transferFrom(
+        new FileInputStream(file) getChannel, 0, Long.MaxValue)
     }
   }
 
   class FileCopier extends Actor {
     def receive = {
       case CopyFile(file, targetLocation) =>
-        ld("copying file " + file + " to " + targetLocation)
+        ld("copying file " + file.getName + " to " + targetLocation)
     }
   }
 
