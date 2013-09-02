@@ -15,18 +15,22 @@ import java.io.{FileOutputStream, FileInputStream, File}
  * - Pass the dir location to monitor as first argument
  *
  * Example:
- * sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src"
+ * sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src target"
  *
  */
 object FileCopier extends App {
 
-  if (args.length == 0) {
-    throw new IllegalArgumentException("Please pass location to monitor as first argument.")
+  if (args.length < 2) {
+    throw new IllegalArgumentException("Please pass location to monitor as first argument and/or target location as second.")
   }
 
   val monitorLocation = new File(args(0))
+  val targetLocation = new File(args(1))
   if (!monitorLocation.isDirectory) {
-    throw new IllegalArgumentException("Location should be directory.")
+    throw new IllegalArgumentException("Location to monitor should be directory.")
+  }
+  if (!targetLocation.isDirectory) {
+    throw new IllegalArgumentException("Target location should be directory.")
   }
 
   monitor()
@@ -37,7 +41,7 @@ object FileCopier extends App {
 
   case class FileFound(file: String)
 
-  case class CopyFile(file: File, targetLocation: File)
+  case class CopyFile(file: File)
 
   case class Wait()
 
@@ -46,7 +50,7 @@ object FileCopier extends App {
 
   def monitor() {
     val system = ActorSystem("FileCopySystem")
-    val fileCopier = system.actorOf(Props(new FileCopier()), name = "file-copier")
+    val fileCopier = system.actorOf(Props(new FileCopier(targetLocation)), name = "file-copier")
     val fileFinder = system.actorOf(Props(new FileFinder(fileCopier)), name = "file-finder")
     val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileFinder)), name = "location-monitor")
     locationMonitor ! StartMonitoring()
@@ -83,7 +87,7 @@ object FileCopier extends App {
         if (!filesFound.isEmpty) {
           for (ff <- filesFound) {
             ld("found file " + ff)
-            fileCopier ! CopyFile(ff, new File("targetLocation"))
+            fileCopier ! CopyFile(ff)
           }
         }
     }
@@ -92,13 +96,13 @@ object FileCopier extends App {
   object FileCopier {
     def copyFileToLocation(file: File, targetLocation: File) = {
       new FileOutputStream(targetLocation) getChannel() transferFrom(
-        new FileInputStream(file) getChannel, 0, Long.MaxValue)
+        new FileInputStream(file).getChannel, 0, Long.MaxValue)
     }
   }
 
-  class FileCopier extends Actor {
+  class FileCopier(targetLocation : File) extends Actor {
     def receive = {
-      case CopyFile(file, targetLocation) =>
+      case CopyFile(file) =>
         ld("copying file " + file.getName + " to " + targetLocation)
     }
   }
