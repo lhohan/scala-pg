@@ -1,5 +1,6 @@
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
-import java.io.{FileOutputStream, FileInputStream, File}
+import java.io.{File, FileOutputStream, FileInputStream}
+import java.nio.file._
 
 /**
  * User: hanlho
@@ -15,7 +16,7 @@ import java.io.{FileOutputStream, FileInputStream, File}
  * - Pass the dir location to monitor as first argument
  *
  * Example:
- * sbt "run-main FileCopier target/scala-2.10/test-classes/file-copy-test-dir/src target"
+ * sbt "run-main FileCopier src/test/resources/file-copy-test-dir/src target"
  *
  */
 object FileCopier extends App {
@@ -24,12 +25,12 @@ object FileCopier extends App {
     throw new IllegalArgumentException("Please pass location to monitor as first argument and/or target location as second.")
   }
 
-  val monitorLocation = new File(args(0))
-  val targetLocation = new File(args(1))
-  if (!monitorLocation.isDirectory) {
+  val monitorLocation = Paths.get(args(0))
+  val targetLocation = Paths.get(args(1))
+  if (!Files.isDirectory(monitorLocation)) {
     throw new IllegalArgumentException("Location to monitor should be directory.")
   }
-  if (!targetLocation.isDirectory) {
+  if (!Files.isDirectory(targetLocation)) {
     throw new IllegalArgumentException("Target location should be directory.")
   }
 
@@ -37,11 +38,11 @@ object FileCopier extends App {
 
   case class StartMonitoring()
 
-  case class FindFiles(location: File)
+  case class FindFiles(location: Path)
 
   case class FileFound(file: String)
 
-  case class CopyFile(file: File)
+  case class CopyFile(file: Path)
 
   case class Wait()
 
@@ -56,7 +57,7 @@ object FileCopier extends App {
     locationMonitor ! StartMonitoring()
   }
 
-  class LocationMonitor(location: File, fileFinder: ActorRef) extends Actor {
+  class LocationMonitor(location: Path, fileFinder: ActorRef) extends Actor {
     val waitTime: Int = 1000 // ms
 
     def receive = {
@@ -73,8 +74,8 @@ object FileCopier extends App {
   }
 
   object FileFinder {
-    def findFilesAt(location: File): Array[File] = {
-      location.listFiles()
+    def findFilesAt(location: Path): DirectoryStream[Path] = {
+      Files.newDirectoryStream(location)
     }
   }
 
@@ -84,26 +85,31 @@ object FileCopier extends App {
       case FindFiles(location) =>
         ld("checking for files at " + location)
         val filesFound = FileFinder.findFilesAt(location)
-        if (!filesFound.isEmpty) {
-          for (ff <- filesFound) {
-            ld("found file " + ff)
-            fileCopier ! CopyFile(ff)
-          }
+        val it = filesFound.iterator()
+        while (it.hasNext) {
+          fileCopier ! CopyFile(it.next())
         }
     }
   }
 
   object FileCopier {
-    def copyFileToLocation(file: File, targetLocation: File) = {
-      new FileOutputStream(targetLocation) getChannel() transferFrom(
-        new FileInputStream(file).getChannel, 0, Long.MaxValue)
+    def copyFileToLocation(file: Path, targetLocation: Path) = {
+      Files.copy(file, targetLocation.resolve(file.getFileName), StandardCopyOption.REPLACE_EXISTING)
     }
   }
 
-  class FileCopier(targetLocation : File) extends Actor {
+  object FileMover {
+    def moveFileToLocation(file: Path, targetLocation: Path) = {
+      Files.move(file, targetLocation.resolve(file.getFileName), StandardCopyOption.ATOMIC_MOVE)
+    }
+  }
+
+  class FileCopier(targetLocation: Path) extends Actor {
     def receive = {
       case CopyFile(file) =>
-        ld("copying file " + file.getName + " to " + targetLocation)
+        ld("copying file " + file.getFileName + " to " + targetLocation)
+                FileCopier.copyFileToLocation(file, targetLocation)
+//        FileMover.moveFileToLocation(file, targetLocation)
     }
   }
 
