@@ -1,6 +1,7 @@
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
 import java.io.{File, FileOutputStream, FileInputStream}
 import java.nio.file._
+import java.util
 
 /**
  * User: hanlho
@@ -62,6 +63,7 @@ object FileCopier extends App {
 
     def receive = {
       case Monitor() =>
+        // TODO watch service, process key, send monitor again
         fileFinder ! FindFiles(location)
         self ! Wait()
       case Wait() =>
@@ -74,8 +76,21 @@ object FileCopier extends App {
   }
 
   object FileFinder {
-    def findFilesAt(location: Path): DirectoryStream[Path] = {
-      Files.newDirectoryStream(location)
+    def findFilesAt(location: Path): List[Path] = {
+      //      Ok: clumsy but directory stream needs to be closed
+      //      and do not want client to handle that sort of thing
+      val newDirectoryStream: DirectoryStream[Path] = Files.newDirectoryStream(location)
+      val streamIt: util.Iterator[Path] = newDirectoryStream.iterator()
+      def toList(iterator: util.Iterator[Path]): List[Path] = {
+        if (streamIt.hasNext) {
+          val next: Path = streamIt.next()
+          toList(streamIt) :+ next
+        } else {
+          Nil
+        }
+      }
+      newDirectoryStream.close()
+      toList(streamIt)
     }
   }
 
@@ -85,9 +100,8 @@ object FileCopier extends App {
       case FindFiles(location) =>
         ld("checking for files at " + location)
         val filesFound = FileFinder.findFilesAt(location)
-        val it = filesFound.iterator()
-        while (it.hasNext) {
-          fileCopier ! CopyFile(it.next())
+        for (file <- filesFound) {
+          fileCopier ! CopyFile(file)
         }
     }
   }
@@ -108,8 +122,8 @@ object FileCopier extends App {
     def receive = {
       case CopyFile(file) =>
         ld("copying file " + file.getFileName + " to " + targetLocation)
-                FileCopier.copyFileToLocation(file, targetLocation)
-//        FileMover.moveFileToLocation(file, targetLocation)
+        FileCopier.copyFileToLocation(file, targetLocation)
+      //        FileMover.moveFileToLocation(file, targetLocation)
     }
   }
 

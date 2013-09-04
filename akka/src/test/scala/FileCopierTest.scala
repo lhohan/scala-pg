@@ -1,5 +1,6 @@
 import java.io.File
 import java.net.URL
+import java.nio.file.Paths
 import org.scalatest.FunSuite
 
 /**
@@ -13,8 +14,8 @@ class FileCopierTest extends FunSuite {
   // FileFinder
   test("test FileFinder on local dir") {
     val location: String = fileCopyTestDir + "/src"
-    val filesAt: Array[File] = FileFinder.findFilesAt(new File(location))
-    assert(2 === filesAt.size, "wrong number of files found")
+    val files = FileFinder.findFilesAt(Paths.get(location))
+    assert(2 === files.size, "wrong number of files found")
   }
 
   def fileCopyTestDir = {
