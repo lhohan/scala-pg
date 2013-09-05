@@ -1,7 +1,8 @@
 import akka.actor.{ActorRef, Props, Actor, ActorSystem}
-import java.io.{File, FileOutputStream, FileInputStream}
 import java.nio.file._
 import java.util
+import StandardWatchEventKinds._
+import scala.collection.JavaConversions._
 
 /**
  * User: hanlho
@@ -39,13 +40,7 @@ object FileCopier extends App {
 
   case class StartMonitoring()
 
-  case class FindFiles(location: Path)
-
-  case class FileFound(file: String)
-
   case class CopyFile(file: Path)
-
-  case class Wait()
 
   case class Monitor()
 
@@ -53,56 +48,27 @@ object FileCopier extends App {
   def monitor() {
     val system = ActorSystem("FileCopySystem")
     val fileCopier = system.actorOf(Props(new FileCopier(targetLocation)), name = "file-copier")
-    val fileFinder = system.actorOf(Props(new FileFinder(fileCopier)), name = "file-finder")
-    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileFinder)), name = "location-monitor")
+    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileCopier)), name = "location-monitor")
     locationMonitor ! StartMonitoring()
   }
 
-  class LocationMonitor(location: Path, fileFinder: ActorRef) extends Actor {
-    val waitTime: Int = 1000 // ms
+  class LocationMonitor(location: Path, fileProcessor: ActorRef) extends Actor {
+    val watcher = FileSystems.getDefault().newWatchService()
+    location.register(watcher, ENTRY_CREATE)
 
     def receive = {
       case Monitor() =>
-        // TODO watch service, process key, send monitor again
-        fileFinder ! FindFiles(location)
-        self ! Wait()
-      case Wait() =>
-        Thread.sleep(waitTime)
+        val watchKey = watcher.take()
+        for (event <- watchKey.pollEvents()) {
+          val path = event.context().asInstanceOf[Path]
+          ld("watcher found: " + path)
+          fileProcessor ! CopyFile(location.resolve(path))
+        }
+        watchKey.reset()
         self ! Monitor()
       case StartMonitoring() =>
-        ld("start monitoring location " + location)
+        li("start monitoring location " + location)
         self ! Monitor()
-    }
-  }
-
-  object FileFinder {
-    def findFilesAt(location: Path): List[Path] = {
-      //      Ok: clumsy but directory stream needs to be closed
-      //      and do not want client to handle that sort of thing
-      val newDirectoryStream: DirectoryStream[Path] = Files.newDirectoryStream(location)
-      val streamIt: util.Iterator[Path] = newDirectoryStream.iterator()
-      def toList(iterator: util.Iterator[Path]): List[Path] = {
-        if (streamIt.hasNext) {
-          val next: Path = streamIt.next()
-          toList(streamIt) :+ next
-        } else {
-          Nil
-        }
-      }
-      newDirectoryStream.close()
-      toList(streamIt)
-    }
-  }
-
-  class FileFinder(fileCopier: ActorRef) extends Actor {
-
-    def receive = {
-      case FindFiles(location) =>
-        ld("checking for files at " + location)
-        val filesFound = FileFinder.findFilesAt(location)
-        for (file <- filesFound) {
-          fileCopier ! CopyFile(file)
-        }
     }
   }
 
