@@ -18,10 +18,10 @@ import scala.collection.JavaConversions._
  * - Pass the dir location to monitor as first argument
  *
  * Example:
- * sbt "run-main FileCopier src/test/resources/file-copy-test-dir/src target"
+ * sbt "run-main FileProcessor src/test/resources/file-copy-test-dir/src target"
  *
  */
-object FileCopier extends App {
+object FileProcessor extends App {
 
   if (args.length < 2) {
     throw new IllegalArgumentException("Please pass location to monitor as first argument and/or target location as second.")
@@ -36,11 +36,18 @@ object FileCopier extends App {
     throw new IllegalArgumentException("Target location should be directory.")
   }
 
+    val processType = Copy
+//  val processType = Move
+
   monitor()
 
   case class StartMonitoring()
 
-  case class CopyFile(file: Path)
+  sealed trait FileCommand
+
+  case class CopyFile(file: Path) extends FileCommand
+
+  case class MoveFile(file: Path) extends FileCommand
 
   case class Monitor()
 
@@ -62,7 +69,7 @@ object FileCopier extends App {
         for (event <- watchKey.pollEvents()) {
           val path = event.context().asInstanceOf[Path]
           ld("watcher found: " + path)
-          fileProcessor ! CopyFile(location.resolve(path))
+          fileProcessor ! processType.command(location.resolve(path))
         }
         watchKey.reset()
         self ! Monitor()
@@ -72,25 +79,41 @@ object FileCopier extends App {
     }
   }
 
-  object FileProcessor {
-
-    def copyFileToLocation(file: Path, targetLocation: Path) = {
-      Files.copy(file, targetLocation.resolve(file.getFileName), StandardCopyOption.REPLACE_EXISTING)
-    }
-
-    def moveFileToLocation(file: Path, targetLocation: Path) = {
-      Files.move(file, targetLocation.resolve(file.getFileName), StandardCopyOption.ATOMIC_MOVE)
-    }
-
-  }
 
   class FileProcessor(targetLocation: Path) extends Actor {
     def receive = {
       case CopyFile(file) =>
         ld("copying file " + file.getFileName + " to " + targetLocation)
-        FileProcessor.copyFileToLocation(file, targetLocation)
-      //        FileProcessor.moveFileToLocation(file, targetLocation)
+        copyFileToLocation(file, targetLocation)
+      case MoveFile(file) =>
+        ld("moving file " + file.getFileName + " to " + targetLocation)
+        FileProcessor.moveFileToLocation(file, targetLocation)
     }
+  }
+
+  sealed trait ProcessingType {
+    def command(file: Path): FileCommand
+  }
+
+  case object Move extends ProcessingType {
+    override def command(file: Path): FileCommand = {
+      new MoveFile(file)
+    }
+  }
+
+  case object Copy extends ProcessingType {
+    override def command(file: Path): FileCommand = {
+      new CopyFile(file)
+    }
+  }
+
+
+  def copyFileToLocation(file: Path, targetLocation: Path) = {
+    Files.copy(file, targetLocation.resolve(file.getFileName), StandardCopyOption.REPLACE_EXISTING)
+  }
+
+  def moveFileToLocation(file: Path, targetLocation: Path) = {
+    Files.move(file, targetLocation.resolve(file.getFileName), StandardCopyOption.ATOMIC_MOVE)
   }
 
   // quick log debug
