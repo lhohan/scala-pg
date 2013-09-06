@@ -1,6 +1,6 @@
-import akka.actor.{ActorRef, Props, Actor, ActorSystem}
+import akka.actor.{ActorRef, Props, ActorSystem, Actor}
+
 import java.nio.file._
-import java.util
 import StandardWatchEventKinds._
 import scala.collection.JavaConversions._
 
@@ -47,7 +47,7 @@ object FileCopier extends App {
 
   def monitor() {
     val system = ActorSystem("FileCopySystem")
-    val fileCopier = system.actorOf(Props(new FileCopier(targetLocation)), name = "file-copier")
+    val fileCopier = system.actorOf(Props(new FileProcessor(targetLocation)), name = "file-copier")
     val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileCopier)), name = "location-monitor")
     locationMonitor ! StartMonitoring()
   }
@@ -72,24 +72,24 @@ object FileCopier extends App {
     }
   }
 
-  object FileCopier {
+  object FileProcessor {
+
     def copyFileToLocation(file: Path, targetLocation: Path) = {
       Files.copy(file, targetLocation.resolve(file.getFileName), StandardCopyOption.REPLACE_EXISTING)
     }
-  }
 
-  object FileMover {
     def moveFileToLocation(file: Path, targetLocation: Path) = {
       Files.move(file, targetLocation.resolve(file.getFileName), StandardCopyOption.ATOMIC_MOVE)
     }
+
   }
 
-  class FileCopier(targetLocation: Path) extends Actor {
+  class FileProcessor(targetLocation: Path) extends Actor {
     def receive = {
       case CopyFile(file) =>
         ld("copying file " + file.getFileName + " to " + targetLocation)
-        FileCopier.copyFileToLocation(file, targetLocation)
-      //        FileMover.moveFileToLocation(file, targetLocation)
+        FileProcessor.copyFileToLocation(file, targetLocation)
+      //        FileProcessor.moveFileToLocation(file, targetLocation)
     }
   }
 
