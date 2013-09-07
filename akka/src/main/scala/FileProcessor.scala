@@ -36,8 +36,8 @@ object FileProcessor extends App {
     throw new IllegalArgumentException("Target location should be directory.")
   }
 
-    val processType = Copy
-//  val processType = Move
+  val processType = Copy
+  //  val processType = Move
 
   monitor()
 
@@ -116,16 +116,21 @@ object FileProcessor extends App {
     Files.move(file, targetLocation.resolve(file.getFileName), StandardCopyOption.ATOMIC_MOVE)
   }
 
+
+  // logging
+  val IsDebugEnabled = false
+  val IsInfoEnabled = true
+
   // quick log debug
   def ld(msg: String) = {
     // akka logger?
-    println("DEBUG " + msg)
+    if (IsDebugEnabled) println("DEBUG " + msg)
   }
 
   // quick log info
   def li(msg: String) = {
     // akka logger?
-    println("INFO " + msg)
+    if (IsInfoEnabled) println("INFO " + msg)
   }
 
 
