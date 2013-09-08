@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
  * Playing with akka.
  *
  * A contrived code sample that monitors a file location
- * and when files are found they are copied to different location.
+ * and when files are found they are copied/moved to different location.
  *
  * Usage:
  * args:
