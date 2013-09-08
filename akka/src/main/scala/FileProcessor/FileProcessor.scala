@@ -6,6 +6,8 @@ import FileProcessor.Monitor
 import FileProcessor.StartMonitoring
 import java.nio.file._
 import java.util.concurrent.atomic.AtomicInteger
+import scala.collection.mutable.ArrayBuffer
+import scala.io.Source
 import StandardWatchEventKinds._
 import scala.collection.JavaConversions._
 
@@ -27,21 +29,69 @@ import scala.collection.JavaConversions._
 
 object LocationMonitorMain extends App {
 
-  private val config1: MonitorConfig = new MonitorConfig(
-    "src/test/resources/file-copy-test-dir/src",
-    "target",
-    Copy
-  )
 
-  private val config2: MonitorConfig = new MonitorConfig(
-    "src/test/resources/file-move-test-dir",
-    "E:\\dev\\github\\scala-pg\\akka\\src\\test\\resources\\file-copy-test-dir\\src",
-    Move
-  )
+  //  val configs = testSetup
+  val configs = readConfigFromFile
 
-  val configs = config1 :: config2 :: Nil
   for (config <- configs) {
     new FileProcessor(config).monitor()
+  }
+
+  def readConfigFromFile: List[MonitorConfig] = {
+
+    def toProcessingType(processingTypeString: String): ProcessingType = processingTypeString.toLowerCase.trim match {
+      case "copy" => Copy
+      case "move" => Move
+      case _ => throw new IllegalArgumentException("Unknown processing type: " + processingTypeString + ". Should be 'copy, 'move', ..")
+    }
+
+    val configFile = {
+      if (args.size > 0) {
+        Paths.get(args(0))
+      } else {
+        Paths.get("monitor.config")
+      }
+    }
+
+    if (!Files.exists(configFile)) {
+      throw new IllegalArgumentException("Monitor config file is missing. " +
+        "Either provide an existing file as argument or create 'monitor.config'.")
+    }
+
+    //TODO : try to improve :
+
+    val lines: Iterator[String] = Source.fromFile(configFile.toFile).getLines()
+      .map{_.trim}
+      .filter{!_.isEmpty}
+      .filter{!_.startsWith("#") }
+
+    val configs = new ArrayBuffer[MonitorConfig]()
+    for (configLine <- lines) {
+        ld("reading config line: " + configLine)
+          val config: Array[String] = configLine.split(",")
+          try {
+            configs += new MonitorConfig(config(1), config(2), toProcessingType(config(0)))
+          } catch {
+            case e: Throwable =>
+              li("Error reading config line: \n" + configLine + "\n => Error is: " + e.getMessage)
+          }
+    }
+    configs.toList
+  }
+
+  def testSetup: List[MonitorConfig] = {
+    val config1: MonitorConfig = new MonitorConfig(
+      "src/test/resources/file-copy-test-dir/src",
+      "target",
+      Copy
+    )
+
+    val config2: MonitorConfig = new MonitorConfig(
+      "src/test/resources/file-move-test-dir",
+      "E:\\dev\\github\\scala-pg\\akka\\src\\test\\resources\\file-copy-test-dir\\src",
+      Move
+    )
+    config1 :: config2 :: Nil
   }
 
 }
