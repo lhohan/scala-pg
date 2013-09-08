@@ -46,26 +46,26 @@ object FileProcessor {
 
   sealed trait FileCommand
 
-  case class CopyFile(file: Path) extends FileCommand
+  case class CopyFile(file: Path, target: Path) extends FileCommand
 
-  case class MoveFile(file: Path) extends FileCommand
+  case class MoveFile(file: Path, target: Path) extends FileCommand
 
   case class Monitor()
 
 
   sealed trait ProcessingType {
-    def command(fileToProcess: Path): FileCommand
+    def command(fileToProcess: Path, target: Path): FileCommand
   }
 
   case object Move extends ProcessingType {
-    override def command(file: Path): FileCommand = {
-      new MoveFile(file)
+    override def command(file: Path, target: Path): FileCommand = {
+      new MoveFile(file, target)
     }
   }
 
   case object Copy extends ProcessingType {
-    override def command(file: Path): FileCommand = {
-      new CopyFile(file)
+    override def command(file: Path, target: Path): FileCommand = {
+      new CopyFile(file, target)
     }
   }
 
@@ -111,12 +111,12 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
 
   def monitor() {
     val system = ActorSystem("FileCopySystem")
-    val fileCopier = system.actorOf(Props(new FileProcessor(targetLocation)), name = "file-copier")
-    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, processingType, fileCopier)), name = "location-monitor")
+    val fileCopier = system.actorOf(Props(new FileProcessor()), name = "file-copier")
+    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, targetLocation, processingType, fileCopier)), name = "location-monitor")
     locationMonitor ! StartMonitoring()
   }
 
-  class LocationMonitor(location: Path, processingType: ProcessingType, fileProcessor: ActorRef) extends Actor {
+  class LocationMonitor(location: Path, targetLocation: Path, processingType: ProcessingType, fileProcessor: ActorRef) extends Actor {
     val watcher = FileSystems.getDefault().newWatchService()
     location.register(watcher, ENTRY_CREATE)
 
@@ -126,7 +126,7 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
         for (event <- watchKey.pollEvents()) {
           val path = event.context().asInstanceOf[Path]
           ld("watcher found: " + path)
-          fileProcessor ! processingType.command(location.resolve(path))
+          fileProcessor ! processingType.command(location.resolve(path), targetLocation)
         }
         watchKey.reset()
         self ! Monitor()
@@ -136,12 +136,12 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
     }
   }
 
-  class FileProcessor(targetLocation: Path) extends Actor {
+  class FileProcessor() extends Actor {
     def receive = {
-      case CopyFile(file) =>
+      case CopyFile(file, targetLocation) =>
         ld("copying file " + file.getFileName + " to " + targetLocation)
         copyFileToLocation(file, targetLocation)
-      case MoveFile(file) =>
+      case MoveFile(file, targetLocation) =>
         ld("moving file " + file.getFileName + " to " + targetLocation)
         FileProcessor.moveFileToLocation(file, targetLocation)
     }
