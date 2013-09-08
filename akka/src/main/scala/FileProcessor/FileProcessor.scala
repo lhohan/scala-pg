@@ -19,26 +19,35 @@ import scala.collection.JavaConversions._
  * and when files are found they are copied/moved to different location.
  *
  * Usage:
- * args:
- * - Pass the dir location to monitor as first argument
  *
  * Example:
- * sbt "run-main LocationMonitorMain src/test/resources/file-copy-test-dir/src target"
+ * sbt "run-main LocationMonitorMain"
  *
  */
 
 object LocationMonitorMain extends App {
 
-  val monitorLocation = Paths.get("src/test/resources/file-copy-test-dir/src")
-  val targetLocation = Paths.get("target")
-  val processType = Copy
-  //  val processType = Move
+  private val config1: MonitorConfig = new MonitorConfig(
+    "src/test/resources/file-copy-test-dir/src",
+    "target",
+    Copy
+  )
 
-  val processor = new FileProcessor(monitorLocation, targetLocation, processType)
+  private val config2: MonitorConfig = new MonitorConfig(
+    "src/test/resources/file-move-test-dir",
+    "E:\\dev\\github\\scala-pg\\akka\\src\\test\\resources\\file-copy-test-dir\\src",
+    Move
+  )
 
-  processor.monitor()
+  val configs = config1 :: config2 :: Nil
+  for (config <- configs) {
+    new FileProcessor(config).monitor()
+  }
 
 }
+
+case class MonitorConfig(srcLocation: String, targetLocation: String, processingType: ProcessingType)
+
 
 object FileProcessor {
 
@@ -76,10 +85,10 @@ object FileProcessor {
   class FileProcessor() extends Actor {
     def receive = {
       case CopyFile(file, targetLocation) =>
-        ld("copying file " + file.getFileName + " to " + targetLocation)
+        li("copying file " + file.getFileName + " to " + targetLocation)
         copyFileToLocation(file, targetLocation)
       case MoveFile(file, targetLocation) =>
-        ld("moving file " + file.getFileName + " to " + targetLocation)
+        li("moving file " + file.getFileName + " to " + targetLocation)
         FileProcessor.moveFileToLocation(file, targetLocation)
     }
   }
@@ -113,8 +122,10 @@ object FileProcessor {
 
 }
 
-class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val processingType: ProcessingType) {
+class FileProcessor(val monitorLoc: String, val targetLoc: String, val processingType: ProcessingType) {
 
+  val monitorLocation = Paths.get(monitorLoc)
+  val targetLocation = Paths.get(targetLoc)
 
   if (!Files.isDirectory(monitorLocation)) {
     throw new IllegalArgumentException("Location to monitor [" + monitorLocation + "]should be directory.")
@@ -122,6 +133,8 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
   if (!Files.isDirectory(targetLocation)) {
     throw new IllegalArgumentException("Target location [" + targetLocation + "]should be directory.")
   }
+
+  def this(config: MonitorConfig) = this(config.srcLocation, config.targetLocation, config.processingType)
 
 
   def monitor() {
@@ -146,7 +159,8 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
         watchKey.reset()
         self ! Monitor()
       case StartMonitoring() =>
-        li("start monitoring location " + location)
+        li("Start monitoring location for new files: " + location + "\n" +
+          "\ttarget (using " + processingType + ") is " + targetLocation)
         self ! Monitor()
     }
   }
