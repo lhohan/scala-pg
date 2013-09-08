@@ -2,9 +2,14 @@
 import akka.actor._
 
 import FileProcessor._
+import FileProcessor.CopyFile
+import FileProcessor.Monitor
+import FileProcessor.MoveFile
 import FileProcessor.MoveFile
 import FileProcessor.StartMonitoring
+import FileProcessor.StartMonitoring
 import java.nio.file._
+import java.util.concurrent.atomic.AtomicInteger
 import StandardWatchEventKinds._
 import scala.collection.JavaConversions._
 
@@ -41,6 +46,9 @@ object LocationMonitorMain extends App {
 
 object FileProcessor {
 
+  val system = ActorSystem("FileCopySystem")
+  val fileCopier = system.actorOf(Props(new FileProcessor()), name = "file-copier")
+  val monitorCounter = new AtomicInteger()
 
   case class StartMonitoring()
 
@@ -66,6 +74,17 @@ object FileProcessor {
   case object Copy extends ProcessingType {
     override def command(file: Path, target: Path): FileCommand = {
       new CopyFile(file, target)
+    }
+  }
+
+  class FileProcessor() extends Actor {
+    def receive = {
+      case CopyFile(file, targetLocation) =>
+        ld("copying file " + file.getFileName + " to " + targetLocation)
+        copyFileToLocation(file, targetLocation)
+      case MoveFile(file, targetLocation) =>
+        ld("moving file " + file.getFileName + " to " + targetLocation)
+        FileProcessor.moveFileToLocation(file, targetLocation)
     }
   }
 
@@ -110,9 +129,9 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
 
 
   def monitor() {
-    val system = ActorSystem("FileCopySystem")
-    val fileCopier = system.actorOf(Props(new FileProcessor()), name = "file-copier")
-    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, targetLocation, processingType, fileCopier)), name = "location-monitor")
+    val locationMonitor = system.actorOf(Props(
+      new LocationMonitor(monitorLocation, targetLocation, processingType, fileCopier)
+    ), name = "locationMonitor-" + monitorCounter.incrementAndGet())
     locationMonitor ! StartMonitoring()
   }
 
@@ -133,17 +152,6 @@ class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val pro
       case StartMonitoring() =>
         li("start monitoring location " + location)
         self ! Monitor()
-    }
-  }
-
-  class FileProcessor() extends Actor {
-    def receive = {
-      case CopyFile(file, targetLocation) =>
-        ld("copying file " + file.getFileName + " to " + targetLocation)
-        copyFileToLocation(file, targetLocation)
-      case MoveFile(file, targetLocation) =>
-        ld("moving file " + file.getFileName + " to " + targetLocation)
-        FileProcessor.moveFileToLocation(file, targetLocation)
     }
   }
 
