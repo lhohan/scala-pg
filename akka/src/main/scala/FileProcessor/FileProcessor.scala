@@ -2,11 +2,7 @@
 import akka.actor._
 
 import FileProcessor._
-import FileProcessor.CopyFile
 import FileProcessor.Monitor
-import FileProcessor.MoveFile
-import FileProcessor.MoveFile
-import FileProcessor.StartMonitoring
 import FileProcessor.StartMonitoring
 import java.nio.file._
 import java.util.concurrent.atomic.AtomicInteger
