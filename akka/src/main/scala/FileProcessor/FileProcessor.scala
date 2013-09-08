@@ -1,6 +1,9 @@
 
-import akka.actor.{ActorRef, Props, ActorSystem, Actor}
+import akka.actor._
 
+import FileProcessor._
+import FileProcessor.MoveFile
+import FileProcessor.StartMonitoring
 import java.nio.file._
 import StandardWatchEventKinds._
 import scala.collection.JavaConversions._
@@ -19,28 +22,25 @@ import scala.collection.JavaConversions._
  * - Pass the dir location to monitor as first argument
  *
  * Example:
- * sbt "run-main FileProcessor src/test/resources/file-copy-test-dir/src target"
+ * sbt "run-main LocationMonitorMain src/test/resources/file-copy-test-dir/src target"
  *
  */
-object FileProcessor extends App {
 
-  if (args.length < 2) {
-    throw new IllegalArgumentException("Please pass location to monitor as first argument and/or target location as second.")
-  }
+object LocationMonitorMain extends App {
 
-  val monitorLocation = Paths.get(args(0))
-  val targetLocation = Paths.get(args(1))
-  if (!Files.isDirectory(monitorLocation)) {
-    throw new IllegalArgumentException("Location to monitor should be directory.")
-  }
-  if (!Files.isDirectory(targetLocation)) {
-    throw new IllegalArgumentException("Target location should be directory.")
-  }
-
+  val monitorLocation = Paths.get("src/test/resources/file-copy-test-dir/src")
+  val targetLocation = Paths.get("target")
   val processType = Copy
   //  val processType = Move
 
-  monitor()
+  val processor = new FileProcessor(monitorLocation, targetLocation, processType)
+
+  processor.monitor()
+
+}
+
+object FileProcessor {
+
 
   case class StartMonitoring()
 
@@ -53,47 +53,8 @@ object FileProcessor extends App {
   case class Monitor()
 
 
-  def monitor() {
-    val system = ActorSystem("FileCopySystem")
-    val fileCopier = system.actorOf(Props(new FileProcessor(targetLocation)), name = "file-copier")
-    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, fileCopier)), name = "location-monitor")
-    locationMonitor ! StartMonitoring()
-  }
-
-  class LocationMonitor(location: Path, fileProcessor: ActorRef) extends Actor {
-    val watcher = FileSystems.getDefault().newWatchService()
-    location.register(watcher, ENTRY_CREATE)
-
-    def receive = {
-      case Monitor() =>
-        val watchKey = watcher.take()
-        for (event <- watchKey.pollEvents()) {
-          val path = event.context().asInstanceOf[Path]
-          ld("watcher found: " + path)
-          fileProcessor ! processType.command(location.resolve(path))
-        }
-        watchKey.reset()
-        self ! Monitor()
-      case StartMonitoring() =>
-        li("start monitoring location " + location)
-        self ! Monitor()
-    }
-  }
-
-
-  class FileProcessor(targetLocation: Path) extends Actor {
-    def receive = {
-      case CopyFile(file) =>
-        ld("copying file " + file.getFileName + " to " + targetLocation)
-        copyFileToLocation(file, targetLocation)
-      case MoveFile(file) =>
-        ld("moving file " + file.getFileName + " to " + targetLocation)
-        FileProcessor.moveFileToLocation(file, targetLocation)
-    }
-  }
-
   sealed trait ProcessingType {
-    def command(file: Path): FileCommand
+    def command(fileToProcess: Path): FileCommand
   }
 
   case object Move extends ProcessingType {
@@ -134,5 +95,56 @@ object FileProcessor extends App {
     if (IsInfoEnabled) println("INFO " + msg)
   }
 
+
+}
+
+class FileProcessor(val monitorLocation: Path, val targetLocation: Path, val processingType: ProcessingType) {
+
+
+  if (!Files.isDirectory(monitorLocation)) {
+    throw new IllegalArgumentException("Location to monitor [" + monitorLocation + "]should be directory.")
+  }
+  if (!Files.isDirectory(targetLocation)) {
+    throw new IllegalArgumentException("Target location [" + targetLocation + "]should be directory.")
+  }
+
+
+  def monitor() {
+    val system = ActorSystem("FileCopySystem")
+    val fileCopier = system.actorOf(Props(new FileProcessor(targetLocation)), name = "file-copier")
+    val locationMonitor = system.actorOf(Props(new LocationMonitor(monitorLocation, processingType, fileCopier)), name = "location-monitor")
+    locationMonitor ! StartMonitoring()
+  }
+
+  class LocationMonitor(location: Path, processingType: ProcessingType, fileProcessor: ActorRef) extends Actor {
+    val watcher = FileSystems.getDefault().newWatchService()
+    location.register(watcher, ENTRY_CREATE)
+
+    def receive = {
+      case Monitor() =>
+        val watchKey = watcher.take()
+        for (event <- watchKey.pollEvents()) {
+          val path = event.context().asInstanceOf[Path]
+          ld("watcher found: " + path)
+          fileProcessor ! processingType.command(location.resolve(path))
+        }
+        watchKey.reset()
+        self ! Monitor()
+      case StartMonitoring() =>
+        li("start monitoring location " + location)
+        self ! Monitor()
+    }
+  }
+
+  class FileProcessor(targetLocation: Path) extends Actor {
+    def receive = {
+      case CopyFile(file) =>
+        ld("copying file " + file.getFileName + " to " + targetLocation)
+        copyFileToLocation(file, targetLocation)
+      case MoveFile(file) =>
+        ld("moving file " + file.getFileName + " to " + targetLocation)
+        FileProcessor.moveFileToLocation(file, targetLocation)
+    }
+  }
 
 }
