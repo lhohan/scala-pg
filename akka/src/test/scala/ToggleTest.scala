@@ -12,7 +12,7 @@ class ToggleTest extends FunSuite{
 
   private implicit val maxWaitForMsg = 1.second
 
-  test("basic toggling"){
+  test("basic toggling with TestProbe"){
     implicit val system = ActorSystem("TestSystem")
     val toggler = system.actorOf(Props[Toggle])
     val p = TestProbe()
