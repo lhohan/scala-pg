@@ -10,16 +10,20 @@ import scala.concurrent.duration._
  */
 class ToggleTest extends FunSuite{
 
+  private implicit val maxWaitForMsg = 1.second
+
   test("basic toggling"){
     implicit val system = ActorSystem("TestSystem")
     val toggler = system.actorOf(Props[Toggle])
     val p = TestProbe()
     p.send(toggler, "Hello, how are you?")
-    p.expectMsg(1 second, "Happy" )
+    p.expectMsg("Happy" )
     p.send(toggler, "Hello, how are you?")
-    p.expectMsg(1 second, "Sad" )
+    p.expectMsg("Sad" )
     p.send(toggler, "Hello, how are you?")
-    p.expectMsg(1 second, "Happy" )
+    p.expectMsg("Happy" )
+    p.send(toggler, "Unknown")
+    p.expectNoMsg()
     system.shutdown()
   }
 
