@@ -1,18 +1,11 @@
 package anki
 
 import scala.annotation.tailrec
+import scala.io.Source
 
-/**
- * User: hanlho
- * DateTime: 3/04/2014 7:39
- */
-object Anki extends App {
+object AnkiApp extends App {
 
-  import scala.io.Source
-
-  case class Card(front: String, back: String)
-
-  type Deck = List[Card]
+  import Anki._
 
   val inputFile = {
     if (args.length > 0) args(0)
@@ -23,6 +16,20 @@ object Anki extends App {
     if (args.length > 1) args(1)
     else "./ankiImport.txt"
   }
+
+  val lines = Source.fromFile(inputFile).getLines.filterNot(_.trim.startsWith("#")).toList
+  //lines.foreach(println(_))
+
+  val deck = newDeck(lines)
+  deck.foreach(println(_))
+
+}
+
+object Anki {
+
+  case class Card(front: String, back: String)
+
+  type Deck = List[Card]
 
 //  @tailrec
   def group(lines: List[String]): List[List[String]] = {
@@ -40,16 +47,5 @@ object Anki extends App {
     invalid.foreach(x => println(s"Invalid input. Could not get card from ${x}"))
     valid.map(list => Card(list(0),list(1)))
   }
-
-  val lines = Source.fromFile(inputFile).getLines.filterNot(_.trim.startsWith("#")).toList
-  //lines.foreach(println(_))
-
-  val deck = newDeck(lines)
-  deck.foreach(println(_))
-
-
-
-
-  //  Source.fromInputStream(getClass.getResourceAsStream("anki.txt")).foreach(println(_))
 
 }
