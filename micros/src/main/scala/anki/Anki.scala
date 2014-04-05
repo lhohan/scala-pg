@@ -31,7 +31,7 @@ object Anki {
 
   type Deck = List[Card]
 
-//  @tailrec
+//  TODO @tailrec
   def group(lines: List[String]): List[List[String]] = {
     if (lines.isEmpty) List(List())
     else {
