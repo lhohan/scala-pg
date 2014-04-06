@@ -1,7 +1,7 @@
 package anki
 
-import scala.annotation.tailrec
 import scala.io.Source
+import java.io.PrintWriter
 
 object AnkiApp extends App {
 
@@ -17,21 +17,27 @@ object AnkiApp extends App {
     else "./ankiImport.txt"
   }
 
-  val lines = Source.fromFile(inputFile).getLines.filterNot(_.trim.startsWith("#")).toList
-  //lines.foreach(println(_))
+  val linesInMem = Source.fromFile(inputFile).getLines.toList
+  val deck = newDeck(linesInMem)
+  val writer = new PrintWriter(outFile)
+  val validCards  = deck.filter(_.valid)
+  validCards.foreach(card => writer.println(card.front + "\t" + card.back + "\t" + card.detail + "\t" + card.info))
+  writer.close()
 
-  val deck = newDeck(lines)
-  deck.foreach(println(_))
-
+  //printSummary
+  println(s"Cards written: ${validCards.size}.")
+  if(deck.size > validCards.size){
+    deck.filterNot(_.valid).foreach(c => println("Invald card found. Skipped: " + c))
+  }
 }
 
 object Anki {
 
-  case class Card(front: String, back: String)
+  case class Card(front: String, back: String, detail: String = "", info: String = "", valid: Boolean = true)
 
   type Deck = List[Card]
 
-//  TODO @tailrec
+  //  TODO @tailrec
   def group(lines: List[String]): List[List[String]] = {
     if (lines.isEmpty) List(List())
     else {
@@ -43,9 +49,18 @@ object Anki {
   }
 
   def newDeck(lines: List[String]): Deck = {
-    val (valid, invalid) = group(lines).partition(_.size == 2)
-    invalid.foreach(x => println(s"Invalid input. Could not get card from ${x}"))
-    valid.map(list => Card(list(0),list(1)))
+    val cardLines = group(lines)
+    cardLines.map {
+      list =>
+        val detail = list.filter(_.startsWith(".")).map(_.tail).mkString(" ")
+        val info = list.filter(_.startsWith("#")).map(_.tail).mkString(" ")
+        val frontAndBackLines = list.filterNot(line => line.startsWith(".") || line.startsWith("#"))
+        frontAndBackLines match {
+          case Nil => Card("No front content", "No back content", detail, info, false)
+          case front :: Nil => Card(front, "No back content", detail, info, false)
+          case front :: rest => Card(front, rest.mkString(" "), detail, info)
+        }
+    }
   }
 
 }

@@ -18,7 +18,7 @@ class AnkiTest extends FlatSpec {
     assert(2 === grouped.size, s"wrong number of groupings in $grouped")
   }
 
-  "creating a new deck on setup where first line contains front and second contains back for 3 cards definitions" should
+  "creating a new deck in a setup where the first line contains front and second contains back for 3 cards definitions" should
     "return a deck of 3 cards" in {
 
     val lines = List("front 1","back 1", "  ", "front 2","  back 2", "","   front 3","back 3")
@@ -26,5 +26,31 @@ class AnkiTest extends FlatSpec {
     val deck = newDeck(lines)
 
     assert(3 === deck.size, s"wrong number of cards in $deck")
+  }
+
+  "creating a new deck in a setup where " +
+    "there are three lines " +
+    "one line starts with a '.' (detail)" +
+    "one line starts with a '#' (info)" +
+    ""   should
+    "return a deck of " +
+      "1 card which contains " +
+      "value for " +
+      "front, " +
+      "back which contains concat of 2 lines " +
+      "detail" +
+      "info" +
+      "" in {
+
+    val lines = List("#info", "front 1","back 1", "back 2", ".detail")
+
+    val deck = newDeck(lines)
+
+    assert(1 === deck.size, s"back card continuation: wrong number of cards in $deck")
+    val card = deck(0)
+    assert("front 1" === card.front)
+    assert("back 1 back 2" === card.back)
+    assert("detail" === card.detail)
+    assert("info" === card.info)
   }
 }
