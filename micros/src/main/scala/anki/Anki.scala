@@ -17,7 +17,7 @@ object AnkiApp extends App {
     else "./ankiImport.txt"
   }
 
-  val linesInMem = Source.fromFile(inputFile).getLines.toList
+  val linesInMem = Source.fromFile(inputFile).getLines.filterNot(_.startsWith("//")).toList
   val deck = newDeck(linesInMem)
   val writer = new PrintWriter(outFile)
   val validCards  = deck.filter(_.valid)

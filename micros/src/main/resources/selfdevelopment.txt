@@ -1,3 +1,11 @@
+// Card are separated by an extra line break (empty line)
+// Line starts with '#' => info (on back) e.g. source, book
+// Line starts with ',' => hint (on front)
+// Line starts with '.' => detail (on back)
+// No prefix:
+//   first line will be Front (the question)
+//   rest of lines are concatenated for Back (the answer)
+//
 What is the 7th Habit? Sharpen _____
 the Saw
 .Balance and renew your resources, energy, and health to create a sustainable, long-term, effective lifestyle. It primarily emphasizes exercise for physical renewal, prayer (meditation, yoga, etc.) and good reading for mental renewal. It also mentions service to society for spiritual renewal.
