@@ -32,6 +32,7 @@ class AnkiTest extends FlatSpec {
     "there are three lines " +
     "one line starts with a '.' (detail)" +
     "one line starts with a '#' (info)" +
+    "one line starts with a ',' (hint)" +
     ""   should
     "return a deck of " +
       "1 card which contains " +
@@ -40,9 +41,10 @@ class AnkiTest extends FlatSpec {
       "back which contains concat of 2 lines " +
       "detail" +
       "info" +
+      "hint" +
       "" in {
 
-    val lines = List("#info", "front 1","back 1", "back 2", ".detail")
+    val lines = List("#info", "front 1",",hint","back 1", "back 2", ".detail")
 
     val deck = newDeck(lines)
 
@@ -52,5 +54,6 @@ class AnkiTest extends FlatSpec {
     assert("back 1 back 2" === card.back)
     assert("detail" === card.detail)
     assert("info" === card.info)
+    assert("hint" === card.hint)
   }
 }
