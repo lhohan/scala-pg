@@ -217,5 +217,22 @@ active recall testing and spaced repetition
 "Active recall testing" is a practical implementation of ______ and important concept for trying to _______
 'reaching' / remember the answer when asked a question.
 
+Effectiveness is doing _________, but efficiency is doing things right.
+the right things
+.That means effectiveness is picking a direction and efficiency is running really fast in that direction
 
+Effectiveness is doing the right things, but efficiency is doing ________.
+things right
+.That means effectiveness is picking a direction and efficiency is running really fast in that direction
 
+Getting Things Done. Explain the "Four Ds" when handling your Inbox.
+Do It<br>Drop it<br>Delegate it<br>Defer it
+.Use in combination with Stephen Covey's four quadrants (Urgent,Important,...)
+.<br>"drop it" leads Hanselman to encourage the practice of "dropping the ball."
+.<br>Though this sounds irresponsible, this will lead you to feel better about yourself as you'll be better able to focus in on your work rather that juggle responsibilities.
+
+With effectiveness in mind, what are David Allen's threefold nature of work?
+Pre-Defined Work - Work you've set up ahead of time
+<br>Work As It Appears - Work that interrupts you
+<br>Defining Work - You sit down and think about what work you need to be doing
+.More time needs to be spent on the last bullet point (Hanselman)
