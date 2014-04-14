@@ -7,6 +7,7 @@ object AnkiApp extends App {
 
   import Anki._
 
+  // TODO get Some tuple of input and output file if no valid input : print usage
   val inputFile = {
     if (args.length > 0) args(0)
     else "./anki.txt"
@@ -52,6 +53,7 @@ object Anki {
     val cardLines = group(lines)
     cardLines.map {
       list =>
+        // TODO implement tags
         val detail = list.filter(_.startsWith(".")).map(_.tail).mkString(" ")
         val hint = list.filter(_.startsWith(",")).map(_.tail).mkString(" ")
         val info = list.filter(_.startsWith("#")).map(_.tail).mkString(" ")
