@@ -8,11 +8,13 @@
 //
 What is the 7th Habit? Sharpen _____
 the Saw
-.Balance and renew your resources, energy, and health to create a sustainable, long-term, effective lifestyle. It primarily emphasizes exercise for physical renewal, prayer (meditation, yoga, etc.) and good reading for mental renewal. It also mentions service to society for spiritual renewal.
+.Balance and renew your resources, energy, and health to create a sustainable, long-term, effective lifestyle. It primarily emphasizes exercise for physical renewal, prayer (meditation, yoga, etc.) and good reading for mental renewal.
+.<br>It also mentions service to society for spiritual renewal.
 
 What is the 1st Habit? Be ______
 Proactive
-.Take initiative in life by realizing that your decisions (and how they align with life's principles) are the primary determining factor for effectiveness in your life. Take responsibility for your choices and the consequences that follow.
+.Take initiative in life by realizing that your decisions (and how they align with life's principles) are the primary determining factor for effectiveness in your life.
+.<br>Take responsibility for your choices and the consequences that follow.
 
 What is the 2nd habit? Begin ____
 with the End in Mind
@@ -31,7 +33,8 @@ Win-Win
 
 What is the 5th Habit? Seek ______
 First to Understand, Then to be Understood
-.Use empathic listening to be genuinely influenced by a person, which compels them to reciprocate the listening and take an open mind to being influenced by you. This creates an atmosphere of caring, and positive problem solving.
+.Use empathic listening to be genuinely influenced by a person, which compels them to reciprocate the listening and take an open mind to being influenced by you.
+.<br>This creates an atmosphere of caring, and positive problem solving.
 
 What is the 6th Habit?
 Synergize
@@ -65,7 +68,7 @@ positive
 #Tip 33 The little book of talent
 To learn from a book, ______
 close it
-.'learning is reaching' : instead of reading 10 pages 4 times and trying to memorize them, read the 10 pages once and try to write a 1 page summary (people remember 50% more material)
+.'learning is reaching' : <br>instead of reading 10 pages 4 times and trying to memorize them, read the 10 pages once and try to write a 1 page summary (people remember 50% more material)
 
 #Tip 34 The little book of talent
 How not repeat your mistakes: use ________.
@@ -167,5 +170,52 @@ don't ever stop trying to get one
 ,'Are your lights on'
 Each solution is the source of  ____
 the next problem
+
+,'Are your lights on'
+Don't solve other people's problems ____
+when they can solve them perfectly well themselves
+.Give people people to chance to solve their own problems, they will come up with solution they support better and with ego involved the solution has better chance of being carried out
+
+,'Are your lights on'
+If it is their problem ____
+make it their problem
+.If a person is in a position to do something about a problem, but doesn't have the problem, then do something so he does. "The campus that was all spaced out."
+
+,'Are your lights on'
+What solution does the title of the book 'Are your lights on' refer to?
+TODO
+
+_____ said: "There are two types of pain you will go through in life, the pain of discipline and the pain of regret. Discipline weighs ounces while regret weighs tonnes."
+Jim Rohn
+
+Jim Rohn said: "There are two types of pain you will go through in life, the pain of ______ and the pain of _____. _____________"
+discipline / regret / Discipline weighs ounces while regret weighs tonnes."
+
+_____ said: "Everything is hard before it becomes easy"
+Johann Wolfgang von Goethe
+
+Johann Wolfgang von Goethe said: "_______ before it becomes easy"
+Everything is hard
+
+Johann Wolfgang von Goethe said: "Everything is hard _______"
+before it becomes easy
+
+Diner before _______
+dessert
+.Self-discipline means self-control, self-mastery, and the ability to have "dinner before dessert."
+.<br>This doesn't mean that you don't have pleasurable experiences in life, but it means that you have them
+.after you have done the hard and necessary work, and completed your key tasks.
+.on a daily basis, do the hard stuff first before relaxing and rewarding yourself.
+. <br>The key word is "sacrifice." It is the ability for you to sacrifice immediate pleasure or gratification in the present so that you can enjoy greater rewards down the road.
+
+What are the two simple concepts behind Anki?
+active recall testing and spaced repetition
+."Active recall testing" is a practical implementation of 'reaching' an important concept for trying to remember the answer when asked a question.
+.This is in contrast to passive study, where we read, watch or listen to something without pausing to consider if we know the answer.
+.<br>"Spaced Repition": use (information) or loose it
+
+"Active recall testing" is a practical implementation of ______ and important concept for trying to _______
+'reaching' / remember the answer when asked a question.
+
 
 
