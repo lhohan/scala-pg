@@ -31,7 +31,7 @@ object AnkiApp extends App {
     writer.close()
 
     //printSummary
-    println(s"Cards written: ${validCards.size} to ${outFile}.")
+    println(s"Cards written: ${validCards.size} to ${outFile}")
     if (deck.size > validCards.size) {
       deck.filterNot(_.valid).foreach(c => println("Invald card found. Skipped: " + c))
     }
