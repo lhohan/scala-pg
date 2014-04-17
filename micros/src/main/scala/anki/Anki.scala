@@ -19,10 +19,6 @@ object AnkiApp extends App {
 
   val files = parseArgs(args)
 
-  def printUsage = {
-    println("usage: Anki <input_file> <output_file>")
-  }
-
   if(files.isEmpty)
     printUsage
   else{
@@ -35,12 +31,15 @@ object AnkiApp extends App {
     writer.close()
 
     //printSummary
-    println(s"Cards written: ${validCards.size}.")
+    println(s"Cards written: ${validCards.size} to ${outFile}.")
     if (deck.size > validCards.size) {
       deck.filterNot(_.valid).foreach(c => println("Invald card found. Skipped: " + c))
     }
   }
 
+  private def printUsage = {
+    println("usage: Anki <input_file> <output_file>")
+  }
 }
 
 object Anki {
