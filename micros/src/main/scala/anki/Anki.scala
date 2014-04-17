@@ -7,34 +7,45 @@ object AnkiApp extends App {
 
   import Anki._
 
-  // TODO get Some tuple of input and output file if no valid input : print usage
-  val inputFile = {
-    if (args.length > 0) args(0)
-    else "./anki.txt"
+  def parseArgs(args: Array[String]) = {
+    args match {
+      case Array(input) =>
+        Some((input, input + "_anki.txt"))
+      case Array(input, output, _*) =>
+        Some((input, output))
+      case Array() => None
+    }
   }
 
-  val outFile = {
-    if (args.length > 1) args(1)
-    else "./ankiImport.txt"
+  val files = parseArgs(args)
+
+  def printUsage = {
+    println("usage: Anki <input_file> <output_file>")
   }
 
-  val linesInMem = Source.fromFile(inputFile).getLines.filterNot(_.startsWith("//")).toList
-  val deck = newDeck(linesInMem)
-  val writer = new PrintWriter(outFile)
-  val validCards  = deck.filter(_.valid)
-  validCards.foreach(card => writer.println(card.front + "\t" + card.back + "\t" + card.detail + "\t" + card.info + "\t" + card.hint))
-  writer.close()
+  if(files.isEmpty)
+    printUsage
+  else{
+    val (inputFile,outFile) = files.get
+    val linesInMem = Source.fromFile(inputFile).getLines.filterNot(_.startsWith("//")).toList
+    val deck = newDeck(linesInMem)
+    val writer = new PrintWriter(outFile)
+    val validCards = deck.filter(_.valid)
+    validCards.foreach(card => writer.println(card.front + "\t" + card.back + "\t" + card.detail + "\t" + card.info + "\t" + card.hint))
+    writer.close()
 
-  //printSummary
-  println(s"Cards written: ${validCards.size}.")
-  if(deck.size > validCards.size){
-    deck.filterNot(_.valid).foreach(c => println("Invald card found. Skipped: " + c))
+    //printSummary
+    println(s"Cards written: ${validCards.size}.")
+    if (deck.size > validCards.size) {
+      deck.filterNot(_.valid).foreach(c => println("Invald card found. Skipped: " + c))
+    }
   }
+
 }
 
 object Anki {
 
-  case class Card(front: String, back: String, detail: String = "", info: String = "", hint: String = "",valid: Boolean = true)
+  case class Card(front: String, back: String, detail: String = "", info: String = "", hint: String = "", valid: Boolean = true)
 
   type Deck = List[Card]
 
@@ -53,7 +64,7 @@ object Anki {
     val cardLines = group(lines)
     cardLines.map {
       list =>
-        // TODO implement tags
+      // TODO implement tags
         val detail = list.filter(_.startsWith(".")).map(_.tail).mkString(" ")
         val hint = list.filter(_.startsWith(",")).map(_.tail).mkString(" ")
         val info = list.filter(_.startsWith("#")).map(_.tail).mkString(" ")
