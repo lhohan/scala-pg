@@ -63,7 +63,6 @@ object Anki {
     val cardLines = group(lines)
     cardLines.map {
       list =>
-      // TODO implement tags
         val detail = list.filter(_.startsWith(".")).map(_.tail).mkString(" ")
         val hint = list.filter(_.startsWith(",")).map(_.tail).mkString(" ")
         val info = list.filter(_.startsWith("#")).map(_.tail).mkString(" ")
