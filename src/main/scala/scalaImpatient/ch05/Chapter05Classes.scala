@@ -1,6 +1,7 @@
 package scalaImpatient.ch05
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
+
 
 object Chapter05Classes {
 

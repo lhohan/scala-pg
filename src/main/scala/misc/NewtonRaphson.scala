@@ -1,6 +1,5 @@
 package misc
 
-import sun.beans.editors.DoubleEditor
 
 /**
  * User: hanlho

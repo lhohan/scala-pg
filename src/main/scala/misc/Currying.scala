@@ -9,7 +9,7 @@ package misc
 
 object Currying extends App {
 
-  def ex1 = {
+  def ex1() = {
 
     def add(x: Int, y: Int) = x + y
 
@@ -17,7 +17,7 @@ object Currying extends App {
 
   }
 
-  def ex2 = {
+  def ex2() = {
 
     def add(x: Int) = (y: Int) => x + y
 
@@ -25,7 +25,7 @@ object Currying extends App {
 
   }
 
-  def ex3 = {
+  def ex3() = {
 
     def add(x: Int)(y: Int) = x + y
 
@@ -33,17 +33,17 @@ object Currying extends App {
 
   }
 
-  def ex4 = {
+  def ex4() = {
 
     def add(x: Int, y: Int) = x + y
-    val addCurried = Function.curried(add _)
+    val addCurried = (add _).curried
 
     println(add(1, 7))
-    println(addCurried(1)(7))
+    //println(addCurried(1)(7))
 
   }
 
-  def ex5 = {
+  def ex5() = {
 
     def add(x: Int)(y: Int) = x + y
     val addUnCurried = Function.uncurried(add _)
