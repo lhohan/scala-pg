@@ -15,16 +15,13 @@ object Lab2 {
 
   def evalRev(list: List[Long]) = list.foldRight(0L)((x: Long, y: Long) => x + (10L * y))
 
-  def toDigits(l: Long): List[Long] = {
-    val b = new ListBuffer[Long]
-    def loop(x: Long): List[Long] = x match {
-      case 0L => b.toList
-      case _ => b.prepend(x % 10); loop(x / 10)
-    }
-    loop(l)
-  }
+  def toDigits(l: Long): List[Long] = toDigitsRev(l).reverse
 
-  def toDigitsRev(l: Long): List[Long] = toDigits(l).reverse
+  def toDigitsRev(l: Long): List[Long] = l match {
+    case 0L => List(0)
+    case x if x >= 0L => l % 10 :: toDigitsRev(l / 10)
+    case _ => throw new RuntimeException("toDigitsRev error for " + l)
+  }
 
   def doubleSecond(list: List[Long]): List[Long] = list.zipWithIndex.map { case (x, i) => if (i % 2 == 1) x * 2 else x}
 

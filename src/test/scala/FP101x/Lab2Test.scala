@@ -13,6 +13,8 @@ class Lab2Test extends FunSuite {
     List(4485429517622493L, 4320635998241421L, 4929778869082405L, 5256283618614517L).foreach { x =>
       assert(eval(toDigits(x)) == x, s"test of $x")
     }
+    assertResult(List(0), "case 0") (toDigits(0))
+    intercept[RuntimeException](toDigits(-531))
   }
 
   test("toDigitsRev") {
