@@ -24,13 +24,13 @@ object Lab2 {
     loop(l)
   }
 
-  def toDigitsRev(l: Long): List[Long] = ???
+  def toDigitsRev(l: Long): List[Long] = toDigits(l).reverse
 
-  def doubleSecond(list: List[Long]): List[Long] = ???
+  def doubleSecond(list: List[Long]): List[Long] = list.zipWithIndex.map { case (x, i) => if (i % 2 == 1) x * 2 else x}
 
-  def sumDigits(list: List[Long]): Long = ???
+  def sumDigits(list: List[Long]): Long = list.flatMap(toDigits).sum
 
-  def isValid(l: Long): Boolean = ???
+  def isValid(l: Long): Boolean = sumDigits (doubleSecond(toDigitsRev(l))) % 10 == 0
 
   def numValid(list: List[Long]): Long = list filter (isValid) map (_ => 1L) sum
 
