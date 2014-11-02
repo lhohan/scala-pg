@@ -30,9 +30,9 @@ object Lab2 {
 
   def sumDigits(list: List[Long]): Long = list.flatMap(toDigits).sum
 
-  def isValid(l: Long): Boolean = sumDigits (doubleSecond(toDigitsRev(l))) % 10 == 0
+  def isValid(l: Long): Boolean = sumDigits(doubleSecond(toDigitsRev(l))) % 10 == 0
 
-  def numValid(list: List[Long]): Long = list filter (isValid) map (_ => 1L) sum
+  def numValid(list: List[Long]): Long = (list filter isValid map (_ => 1L)).sum
 
   def creditcards: List[Long] = List(4716347184862961L, 4532899082537349L,
     4485429517622493L, 4320635998241421L, 4929778869082405L, 5256283618614517L,
@@ -64,5 +64,5 @@ object Lab2 {
     345714137642682L, 347556554119626L, 370919740116903L, 375059255910682L,
     373129538038460L, 346734548488728L, 370697814213115L, 377968192654740L,
     379127496780069L, 375213257576161L, 379055805946370L, 345835454524671L,
-    377851536227201L, 345763240913232L);
+    377851536227201L, 345763240913232L)
 }
