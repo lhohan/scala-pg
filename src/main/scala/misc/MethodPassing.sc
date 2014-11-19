@@ -36,6 +36,13 @@ def doSomethingElse(ids: Ids) = ids match {
 doSomething(Ids(Some(12345L), None))
 doSomethingElse(Ids(Some(12345L), None))
 
+def execute[A](ids: Ids)(f: Any => A): A = ids match {
+  case Ids(_, Some(uuid)) => f(uuid)
+  case Ids(Some(long), _) => f(long)
+}
+
+def _doSomething(ids: Ids) = execute[String](ids)(take2)
+//def _doSomething2(ids: Ids) = execute[Path](ids)(toPath)
 
 
 
