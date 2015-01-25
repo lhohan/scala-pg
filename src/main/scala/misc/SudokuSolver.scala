@@ -7,6 +7,7 @@ object SudokuSolver {
 
   // TODO : only stream in case of infinite lists ...?
   // TODO: consistent method signature: functional args as it is more in spirit of book and functional style
+  // TODO: check out compose
 
   type Row[A] = Stream[A]
   type Matrix[A] = Stream[Row[A]]
@@ -85,8 +86,35 @@ object SudokuSolver {
     x <- xs
   } yield x
 
-  // nice expression of how we are solving
+  // nice expression of how we are solving, too slow tough
   def solve(g: Grid): Stream[Grid] = expand(choices(g)) filter valid
+
+  def prune: Matrix[Choices] => Matrix[Choices] = m =>
+    pruneBy(cols)(pruneBy(rows)(pruneBy(boxs)(m)))
+
+  def pruneRow: Row[Choices] => Row[Choices] = row => {
+    def singleton: Choices => Boolean = c => c.size == 1
+    // list of all singletons
+    def fixed: Choices = (for {
+      c <- row if singleton(c)
+    } yield c).map(_.head) // TODO: better way
+    // remove all digits in singleton from the other choices
+    def remove: (Choices, Choices) => Choices = (xs, ds) =>
+        if(singleton(xs)) xs else xs.filterNot(x => ds.contains(x))
+    row.map(c => remove(c, fixed))
+  }
+
+  def pruneBy(f: (Matrix[Choices]) => Matrix[Choices])(m : Matrix[Choices]) = f(f(m).map(pruneRow))
+
+  // with pruning
+  def solve2(g: Grid): Stream[Grid] = expand(prune(choices(g))) filter valid
+
+  // pruning until no changes are left, we return state each time to compare with
+  def solve3(g: Grid): Stream[Grid] = ???
+
+
+
+
 
 
 }
