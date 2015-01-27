@@ -2,7 +2,7 @@ package misc
 
 import org.scalatest.FunSuite
 
-import scala.concurrent.{TimeoutException, Await, Future}
+import scala.concurrent.{Await, Future}
 
 /**
  * Created by hans on 25/01/15.
@@ -138,21 +138,39 @@ class SudokuSolverTest extends FunSuite {
 
   }
 
-    test("solve - pruning solver, with significant improvement over initial solver (more than 5 or 6 blanks runs a lot longer than 30 seconds)") {
-      assertResult(solved){
-        val (elapsed, result) = time(solve2(sudokuSinglePrune).toList, 30 seconds)
-        printTime(elapsed,"pruning solver")
-        result.head
-      }
+  test("solve - pruning solver, with significant improvement over initial solver (more than 5 or 6 blanks runs a lot longer than 30 seconds)") {
+    assertResult(solved) {
+      val (elapsed, result) = time(solve2(sudoku1_singlePrune).toList, 30 seconds)
+      printTime(elapsed, "pruning solver")
+      result.head
     }
+  }
 
-  test("solve - repeater pruning solver") {
-      assertResult(solved){
-        val (elapsed, result) = time(solve3(sudokuSinglePrune).toList, 30 seconds)
-        printTime(elapsed,"repeated pruning solver")
-        result.head
-      }
+  test("solve - repeating pruning solver - compared to single prune 2500ms -> 10ms") {
+    assertResult(solved) {
+      val (elapsed, result) = time(solve2_(sudoku1_singlePrune).toList, 30 seconds)
+      printTime(elapsed, "repeated pruning solver")
+      result.head
     }
+  }
+
+  //  test("solve - repeating pruning solver - sudoku 1 full") {
+  //    assertResult(solved){
+  //      val (elapsed, result) = time(solve2_(sudoku1_full).toList, 60 seconds)
+  //      printTime(elapsed,"repeated pruning solver")
+  //      result.head
+  //    }
+  //  }
+
+  test("counts") {
+    assertResult(Stream(3, 4, 6, 7)) {
+      counts(Stream(
+        Stream(Stream(1, 2, 3), Stream(1, 1, 1, 1)),
+        Stream(Stream(4, 5, 6, 7, 8, 9)),
+        Stream(Stream(1), Stream(1, 2, 3, 4, 5, 6, 7))
+      ))
+    }
+  }
 
   def mkString: Grid => String = g => "\n" + g.map(_.mkString("|")).mkString("\n")
 
@@ -168,7 +186,7 @@ class SudokuSolverTest extends FunSuite {
     Stream(5, 2, 8, 9, 3, 4, 1, 6, 7)
   )
 
-  lazy val sudokuSinglePrune: Grid = Stream(
+  lazy val sudoku1_singlePrune: Grid = Stream(
     Stream(X, X, X, X, X, X, 6, 8, X),
     Stream(X, X, X, X, 7, 3, 2, 1, 9),
     Stream(3, X, 9, 2, 6, X, 7, 4, 5),
@@ -180,7 +198,7 @@ class SudokuSolverTest extends FunSuite {
     Stream(5, 2, 8, 9, 3, X, 1, 6, 7)
   )
 
-  lazy val sudoku = Stream(
+  lazy val sudoku1_full: Grid = Stream(
     Stream(X, X, X, X, X, X, 6, 8, X),
     Stream(X, X, X, X, 7, 3, X, X, 9),
     Stream(3, X, 9, X, X, X, X, 4, 5),

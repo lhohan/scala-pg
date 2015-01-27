@@ -19,7 +19,7 @@ object SudokuSolver {
   val Blank = 0
   def blank = (x: Int) => x == Blank
 
-  type Choices = Stream[Digit]
+  type Choices = Stream[Digit] // TODO Row[Digit]
 
   // given a grid, create matrix where each field contains a Stream of possible choices
   def choices(g: Grid): Matrix[Choices] = {
@@ -109,8 +109,28 @@ object SudokuSolver {
   // with pruning
   def solve2(g: Grid): Stream[Grid] = expand(prune(choices(g))) filter valid
 
-  // pruning until no changes are left, we return state each time to compare with
-  def solve3(g: Grid): Stream[Grid] = ???
+  // repeatedly pruning
+  def solve2_(g: Grid): Stream[Grid] = {
+    def nextPrune(matrix: Matrix[Choices]) = (prune(matrix), matrix)
+    def loop(choices: Matrix[Choices]): Matrix[Choices] = {
+      nextPrune(choices) match {
+        case (pruned, orig) if pruned == orig => pruned
+        case (pruned,_) => loop(prune(pruned))
+      }
+    }
+    val fullyPruned = loop(choices(g))
+    expand(fullyPruned) filter valid
+  }
+
+
+  // solution 3
+  def counts(rows: Matrix[Choices]): Stream[Int] = rows.flatten.map(_.length).filter(_!=1)
+
+  def expand1(rows: Matrix[Choices]) = {
+    val n = counts(rows).min
+
+   ???
+  }
 
 
 
