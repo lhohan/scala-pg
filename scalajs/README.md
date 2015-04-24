@@ -1,0 +1,1 @@
+A simple Scala JS experiment.
