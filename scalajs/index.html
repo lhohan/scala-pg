@@ -6,13 +6,15 @@
 </head>
 <body>
 
-<h1>Example Scala.js application - full-optimized version</h1>
-
-<p>After having compiled and full-optimized properly the code for the application
-    (using `sbt fullOptJS`), you should see "It works" herebelow.
-    See README.md for detailed explanations.</p>
 
 <div id="playground">
+    <div>
+        x = <input type="text" id="x" value="1"/>
+    </div>
+    <div>
+        x * x = <span id="squared">1</span>
+    </div>
+    <div id="version"></div>
 </div>
 
 <script type="text/javascript" src="./target/scala-2.11/signals-fastopt.js"></script>
