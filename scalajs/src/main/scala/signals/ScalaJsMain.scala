@@ -7,42 +7,63 @@ import org.scalajs.dom.html.{Canvas, Input, Span}
 import org.scalajs.dom.{CanvasRenderingContext2D, Event}
 
 import scala.scalajs.js
+import scala.util.Random
 
 object UI extends js.JSApp {
 
   val version = UUID.randomUUID().toString
+  var coords: Seq[(Int, Int)] = _
+  val (canvas: Canvas, renderer: CanvasRenderingContext2D) = getCanvas
+  var currentPosition: Var[(Int, Int)] = _
+  var unit: Int = _
 
+
+  def keepInCanvas(position: (Int, Int)): (Int, Int) = {
+    val x = position._1
+    val y = position._2
+    val x_ = if (x < 0) x + canvas.width else if (x > canvas.width) x - canvas.width else x
+    val y_ = if (y < 0) y + canvas.height else if (y > canvas.height) y - canvas.height else y
+    (x_, y_)
+  }
 
   def main(): Unit = {
-    //    val unique = elementById[html.Div]("version")
-    //    unique.innerHTML = version
-
     setUpCanvas()
+
+    // on every run the position is changed
+    def run() = {
+      val position = currentPosition()
+      currentPosition() = keepInCanvas((Random.nextBoolean(), Random.nextBoolean()) match {
+        case (true, true)   => (position._1 - unit, position._2 - unit)
+        case (true, false)  => (position._1 - unit, position._2 + unit)
+        case (false, false) => (position._1 + unit, position._2 + unit)
+        case (false, true)  => (position._1 + unit, position._2 - unit)
+      })
+    }
+
+    dom.setInterval(run _, 200)
   }
 
 
   def setUpCanvas(): Unit = {
-    val (canvas: Canvas, renderer: CanvasRenderingContext2D) = getCanvas
-
-    renderer.fillStyle = "#f8f8f8"
     canvas.width = canvas.parentElement.clientWidth
     canvas.height = canvas.parentElement.clientHeight
     renderer.fillRect(0, 0, canvas.width, canvas.height)
+    val heightInUnits = 20
+    unit = canvas.height / heightInUnits
 
-    val coords = {
-      val heightInUnits = 20
-      val unit = canvas.height / heightInUnits
+    coords = {
       for {
         y <- (unit / 2) until canvas.height by unit
         x <- (unit / 2) until canvas.width by unit
       } yield (x, y)
     }
 
+    currentPosition = Var(coords(Random.nextInt(coords.size)))
+
     val input1 = signalElement("input1")
     val input2 = signalElement("input2")
 
     input1() = coords.size.toString
-
 
     Signal {
       renderer.clearRect(
@@ -52,14 +73,21 @@ object UI extends js.JSApp {
       coords.foreach { c =>
         renderer.beginPath()
         renderer.fillStyle = "black"
-        renderer.arc(c._1, c._2, 5, 0, 2 * Math.PI)
+        renderer.arc(c._1, c._2, 1, 0, 2 * Math.PI)
         renderer.fill()
         renderer.stroke()
       }
 
+      renderer.beginPath()
+      renderer.fillStyle = "blue"
+      renderer.arc(currentPosition()._1, currentPosition()._2, unit / 2, 0, 2 * Math.PI)
+      renderer.fill()
+      renderer.stroke()
+
       renderer.textAlign = "center"
       renderer.textBaseline = "middle"
       renderer.font = "75px sans-serif"
+
       renderer.fillStyle = input2()
       renderer.fillText(
         input1(),
