@@ -7,14 +7,15 @@ import org.scalajs.dom.html.{Canvas, Input, Span}
 import org.scalajs.dom.{CanvasRenderingContext2D, Event}
 
 import scala.scalajs.js
-import scala.util.Random
+import scala.util.{Try, Random}
 
 object UI extends js.JSApp {
 
   val version = UUID.randomUUID().toString
   var coords: Seq[(Int, Int)] = _
   val (canvas: Canvas, renderer: CanvasRenderingContext2D) = getCanvas
-  var currentPosition: Var[(Int, Int)] = _
+  // current position is wrapped in a Var which means every signal depending on it will be signalled and be executed
+  var positions: Var[List[(Int, Int)]] = _
   var unit: Int = _
 
 
@@ -31,13 +32,19 @@ object UI extends js.JSApp {
 
     // on every run the position is changed
     def run() = {
-      val position = currentPosition()
-      currentPosition() = keepInCanvas((Random.nextBoolean(), Random.nextBoolean()) match {
-        case (true, true)   => (position._1 - unit, position._2 - unit)
-        case (true, false)  => (position._1 - unit, position._2 + unit)
-        case (false, false) => (position._1 + unit, position._2 + unit)
-        case (false, true)  => (position._1 + unit, position._2 - unit)
-      })
+      val list = positions()
+      val left = Random.nextBoolean()
+      val down = Random.nextBoolean()
+      positions() = list.map { p =>
+        keepInCanvas(
+          (left, down) match {
+            case (true, true)   => (p._1 - unit, p._2 - unit)
+            case (true, false)  => (p._1 - unit, p._2 + unit)
+            case (false, false) => (p._1 + unit, p._2 + unit)
+            case (false, true)  => (p._1 + unit, p._2 - unit)
+          }
+        )
+      }
     }
 
     dom.setInterval(run _, 200)
@@ -58,42 +65,57 @@ object UI extends js.JSApp {
       } yield (x, y)
     }
 
-    currentPosition = Var(coords(Random.nextInt(coords.size)))
 
     val input1 = signalElement("input1")
     val input2 = signalElement("input2")
 
-    input1() = coords.size.toString
+    def randomCoords(n: Int) = (for {
+      _ <- 0 until n
+    } yield coords(Random.nextInt(coords.size))).toList
 
+    positions = Var(randomCoords(input1().toInt))
+
+    // here we register the signal that will rerender if one of its dependencies changes!
     Signal {
-      renderer.clearRect(
-        0, 0, canvas.width, canvas.height
-      )
-
-      coords.foreach { c =>
+      
+      def drawGrid() = coords.foreach { c =>
         renderer.beginPath()
         renderer.fillStyle = "black"
         renderer.arc(c._1, c._2, 1, 0, 2 * Math.PI)
         renderer.fill()
         renderer.stroke()
       }
-
-      renderer.beginPath()
-      renderer.fillStyle = "blue"
-      renderer.arc(currentPosition()._1, currentPosition()._2, unit / 2, 0, 2 * Math.PI)
-      renderer.fill()
-      renderer.stroke()
-
-      renderer.textAlign = "center"
-      renderer.textBaseline = "middle"
-      renderer.font = "75px sans-serif"
-
-      renderer.fillStyle = input2()
-      renderer.fillText(
-        input1(),
-        canvas.width / 2,
-        canvas.height / 2
-      )
+      
+      def adjustPositions(input1: String) = {
+        val valueInput1 = Try(input1.toInt).getOrElse(0)
+        val currentInput1 = positions().size
+        valueInput1 match {
+          case 0 => // do nothing
+          case newInput1: Int if newInput1 < currentInput1 =>
+            val list = positions()
+            positions() = (0 until (currentInput1 - newInput1)).foldLeft(list)((ps, _) => ps.tail)
+          case s: Int if s > currentInput1 =>
+            val list = positions()
+            positions() = list ++ randomCoords(s - currentInput1)
+          case _                  => // do nothing
+        }
+      }
+      
+      def drawPositions(input2:String) = {
+        val list = positions()
+        list.foreach { p =>
+          renderer.beginPath()
+          renderer.arc(p._1, p._2, unit / 2, 0, 2 * Math.PI)
+          renderer.fillStyle = input2
+          renderer.fill()
+          renderer.stroke()
+        }
+      }
+      
+      renderer.clearRect(0, 0, canvas.width, canvas.height)
+      adjustPositions(input1())
+      drawGrid()
+      drawPositions(input2())
     }
   }
 
