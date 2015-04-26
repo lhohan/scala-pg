@@ -6,16 +6,12 @@
 </head>
 <body>
 
-
-<div id="playground">
-    <div>
-        x = <input type="text" id="x" value="1"/>
-    </div>
-    <div>
-        x * x = <span id="squared">1</span>
-    </div>
-    <div id="version"></div>
+<div id="console">
+    text: <input id="input1" type="text" value="hello"><br/>
+    color: <input id="input2" type="text" value="red"><br/>
 </div>
+<canvas style="display: block;border: 1px solid black;" id="mycanvas" width="400" height="400"></canvas>
+<!--<div id="version"></div>-->
 
 <script type="text/javascript" src="./target/scala-2.11/signals-fastopt.js"></script>
 <script type="text/javascript" src="./target/scala-2.11/signals-launcher.js"></script>
