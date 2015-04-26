@@ -29,13 +29,33 @@ object UI extends js.JSApp {
     canvas.height = canvas.parentElement.clientHeight
     renderer.fillRect(0, 0, canvas.width, canvas.height)
 
+    val coords = {
+      val heightInUnits = 20
+      val unit = canvas.height / heightInUnits
+      for {
+        y <- (unit / 2) until canvas.height by unit
+        x <- (unit / 2) until canvas.width by unit
+      } yield (x, y)
+    }
+
     val input1 = signalElement("input1")
     val input2 = signalElement("input2")
+
+    input1() = coords.size.toString
+
 
     Signal {
       renderer.clearRect(
         0, 0, canvas.width, canvas.height
       )
+
+      coords.foreach { c =>
+        renderer.beginPath()
+        renderer.fillStyle = "black"
+        renderer.arc(c._1, c._2, 5, 0, 2 * Math.PI)
+        renderer.fill()
+        renderer.stroke()
+      }
 
       renderer.textAlign = "center"
       renderer.textBaseline = "middle"
@@ -72,7 +92,7 @@ object UI extends js.JSApp {
 
     // here we make the changes on the client are triggering the change in our Signal
     val onChange = { (event: Event) =>
-//      println(s"value changed to ${x.value}")
+      //      println(s"value changed to ${x.value}")
       input() = x.value
     }
     x.addEventListener("change", onChange)
